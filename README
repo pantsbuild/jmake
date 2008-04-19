@@ -1,0 +1,9 @@
+This is the source code for the "jmake" project
+(formerly known as Javamake).
+
+The file:
+ ./com/sun/tools/jmake/ant/JavaMake.java
+requires ant.jar from the Apache foundation to build:
+the rest of the sources are self-contained.
+
+SAU 4/08
