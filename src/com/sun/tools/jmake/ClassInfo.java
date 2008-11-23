@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 /**
  * A reflection of a class, in the form that allows fast checks and information obtaining.
@@ -133,10 +134,10 @@ public class ClassInfo {
      * to the same project, plus those of the superclasses that can be found on the class path
      * supplied to jmake, and on the boot class path.
      */
-    public ArrayList getAllSuperclassNames() {
-        ArrayList res = new ArrayList();
+    public List<String> getAllSuperclassNames() {
+        List<String> res = new ArrayList<String>();
         String superName = this.superName;
-        while (superName != null && superName != "java/lang/Object") {
+        while (superName != null && !"java/lang/Object".equals(superName)) {
             res.add(superName);
             ClassInfo classInfo = pcdm.getClassInfoForName(verCode, superName);
             if (classInfo == null) { // Class not in project (or deleted?). Try to find it and further superclasses in non-project classes
@@ -152,14 +153,15 @@ public class ClassInfo {
      * Returns the set of names of the interfaces transitively implemented by the given
      * class, that belong to the same project.
      */
-    public Set getAllImplementedIntfNames() {
-        Set res = new HashSet();
+    public Set<String> getAllImplementedIntfNames() {
+        Set<String> res = new HashSet<String>();
         addImplementedInterfaceNames(false, res);
         return res;
     }
 
     /** Add to the given set the names of direct/all interfaces implemented by the given class. */
-    private void addImplementedInterfaceNames(boolean directOnly, Set intfSet) {
+    private void addImplementedInterfaceNames(boolean directOnly, 
+            Set<String> intfSet) {
         if (interfaces != null) {
             for (int i = 0; i < interfaces.length; i++) {
                 String superIntfName = interfaces[i];
@@ -195,7 +197,7 @@ public class ClassInfo {
         }
 
         Enumeration entries = pcdm.entriesEnum();
-        ArrayList listRes = new ArrayList();
+        List<ClassInfo> listRes = new ArrayList<ClassInfo>();
 
         while (entries.hasMoreElements()) {
             PCDEntry entry = (PCDEntry) entries.nextElement();
@@ -203,13 +205,12 @@ public class ClassInfo {
             if (classInfo == null) {
                 continue;  // New or deleted class, depending on verCode
             }
-            if (classInfo.superName == name) {
+            if (classInfo.superName.equals(name)) {
                 listRes.add(classInfo);
             }
         }
 
-        directSubclasses =
-                (ClassInfo[]) listRes.toArray(new ClassInfo[listRes.size()]);
+        directSubclasses = listRes.toArray(new ClassInfo[listRes.size()]);
         return directSubclasses;
     }
 

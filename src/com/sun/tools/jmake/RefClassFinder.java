@@ -26,7 +26,7 @@ public class RefClassFinder {
     private boolean noWarnOnDependentJar; // If true, not even a warning will be issued in the above case.
     private String checkedClassName;
     private PCDManager pcdm;
-    private Set affectedClassNames;
+    private Set<String> affectedClassNames;
     private boolean checkedClassIsFromJar;
 
     /** An instance of RefClassFinder is created once per session, passing it the global options that do not change */
@@ -40,7 +40,7 @@ public class RefClassFinder {
     public void initialize(String checkedClassName, boolean checkedClassIsFromJar) {
         this.checkedClassName = checkedClassName;
         this.checkedClassIsFromJar = checkedClassIsFromJar;
-        affectedClassNames = new HashSet();
+        affectedClassNames = new HashSet<String>();
     }
 
     /**
@@ -53,10 +53,10 @@ public class RefClassFinder {
             return null;
         } else {
             String[] ret = new String[size];
-            Iterator iter = affectedClassNames.iterator();
+            Iterator<String> iter = affectedClassNames.iterator();
             int i = 0;
             while (iter.hasNext()) {
-                ret[i++] = (String) iter.next();
+                ret[i++] = iter.next();
             }
             return ret;
         }
@@ -105,14 +105,14 @@ public class RefClassFinder {
         String packageName = classInfo.packageName;
         boolean isPublic = classInfo.isPublic();
         boolean isInterface = classInfo.isInterface();
-        Enumeration pcdEntries = pcdm.entriesEnum();
+        Enumeration<PCDEntry> pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (!isPublic && packageName != clientInfo.packageName) {
+            if (!isPublic && packageName.equals(clientInfo.packageName)) {
                 continue;
             }
             if (clientInfo.referencesClass(classInfo.name, isInterface, 1)) {
@@ -282,14 +282,14 @@ public class RefClassFinder {
      * direct/indirect superclass.
      */
     public void findReferencingClasses2(ClassInfo classInfo1, ClassInfo classInfo2) {
-        HashSet refClazz1 = new HashSet();
+        HashSet<String> refClazz1 = new HashSet<String>();
         findReferencingClasses(classInfo1, 2, false, refClazz1);
-        HashSet refClazz2 = new HashSet();
+        HashSet<String> refClazz2 = new HashSet<String>();
         findReferencingClasses(classInfo2, 2, false, refClazz2);
 
-        Iterator iter1 = refClazz1.iterator();
+        Iterator<String> iter1 = refClazz1.iterator();
         while (iter1.hasNext()) {
-            String className1 = (String) iter1.next();
+            String className1 = iter1.next();
             if (refClazz2.contains(className1)) {
                 addToAffectedClassNames(className1);
             }
@@ -549,7 +549,7 @@ public class RefClassFinder {
      */
     private void findReferencingClasses(ClassInfo classInfo,
             int thorDegree, boolean fromDiffPackages,
-            HashSet ret) {
+            HashSet<String> ret) {
         String packageName = classInfo.packageName;
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
@@ -558,7 +558,7 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (fromDiffPackages && packageName == clientInfo.packageName) {
+            if (fromDiffPackages && packageName.equals(clientInfo.packageName)) {
                 continue;
             }
             // If thorDegree == 2, i.e. indirect references from the constantpool (e.g. a reference to a method which

@@ -8,9 +8,9 @@ package com.sun.tools.jmake;
 
 import java.lang.reflect.Modifier;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class implements checking of source compatibility of classes and supporting operations
@@ -129,12 +129,12 @@ public class CompatibilityChecker {
     }
 
     private void checkSuperclasses() {
-        ArrayList oldSuperNames = oldClassInfo.getAllSuperclassNames();
-        ArrayList newSuperNames = newClassInfo.getAllSuperclassNames();
+        List<String> oldSuperNames = oldClassInfo.getAllSuperclassNames();
+        List<String> newSuperNames = newClassInfo.getAllSuperclassNames();
 
         int oldNamesSizeMinusOne = oldSuperNames.size() - 1;
         for (int i = 0; i <= oldNamesSizeMinusOne; i++) {
-            String oldSuperName = (String) oldSuperNames.get(i);
+            String oldSuperName = oldSuperNames.get(i);
             if (!newSuperNames.contains(oldSuperName)) {
                 versionsCompatible = false;
                 ClassInfo missingSuperClass =

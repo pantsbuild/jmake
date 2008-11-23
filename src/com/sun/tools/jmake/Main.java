@@ -17,6 +17,7 @@ import java.io.StreamTokenizer;
 import java.io.FileNotFoundException;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /** 
  * The main class of the <b>jmake</b> tool.<p>
@@ -35,11 +36,11 @@ public class Main {
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
     static final String VERSION = "1.3.3";
     private String pdbFileName = null;
-    private ArrayList allProjectJavaFileNamesList = new ArrayList(100);
+    private List<String> allProjectJavaFileNamesList = new ArrayList<String>(100);
     private String allProjectJavaFileNames[];
     private String addedJavaFileNames[],  removedJavaFileNames[],  updatedJavaFileNames[];
     private String destDir = "";
-    private ArrayList javacAddArgs = new ArrayList();
+    private List<String> javacAddArgs = new ArrayList<String>();
     private String jcPath,  jcMainClass,  jcMethod;
     private String jcExecApp;
     boolean controlledExecution = false;
@@ -100,7 +101,7 @@ public class Main {
             throw new PrivateException(new PublicExceptions.NoActionRequestedException());
         }
 
-        ArrayList argsV = new ArrayList();
+        List<String> argsV = new ArrayList<String>();
         for (int i = 0; i < args.length; i++) {
             argsV.add(args[i]);
         }
@@ -108,7 +109,7 @@ public class Main {
         String arg;
 
         while (argsSt < argsV.size()) {
-            arg = (String) argsV.get(argsSt++);
+            arg = argsV.get(argsSt++);
             if (arg.charAt(0) == '-') {
                 int argN = inOptions(arg);
                 if (argN != -1) {
@@ -125,31 +126,31 @@ public class Main {
                         printUsage();
                         throw new PrivateException(new PublicExceptions.NoActionRequestedException());
                     case OPT_D:
-                        destDir = (String) argsV.get(argsSt);
+                        destDir = argsV.get(argsSt);
                         javacAddArgs.add("-d");
-                        javacAddArgs.add((String) argsV.get(argsSt));
+                        javacAddArgs.add(argsV.get(argsSt));
                         argsSt++;
                         break;
                     case OPT_CLASSPATH:
                         try {
-                            setClassPath((String) argsV.get(argsSt++));
+                            setClassPath(argsV.get(argsSt++));
                         } catch (PublicExceptions.InvalidCmdOptionException ex) {
                             bailOut(ex.getMessage());
                         }
                         break;
                     case OPT_PROJECTCLASSPATH:
                         try {
-                            setProjectClassPath((String) argsV.get(argsSt++));
+                            setProjectClassPath(argsV.get(argsSt++));
                         } catch (PublicExceptions.InvalidCmdOptionException ex) {
                             bailOut(ex.getMessage());
                         }
                         break;
                     case OPT_STORE:
-                        pdbFileName = (String) argsV.get(argsSt++);
+                        pdbFileName = argsV.get(argsSt++);
                         break;
                     case OPT_JAVAC_OPT:
                         String javacArg =
-                                ((String) argsV.get(argsSt - 1)).substring(2);
+                                (argsV.get(argsSt - 1)).substring(2);
                         if (javacArg.equals("-d") ||
                                 javacArg.equals("-classpath") ||
                                 javacArg.equals("-bootclasspath") ||
@@ -162,25 +163,25 @@ public class Main {
                         if (jcExecApp != null) {
                             bailOut(ERR_NO_TWO_COMPILER_OPTIONS);
                         }
-                        jcPath = (String) argsV.get(argsSt++);
+                        jcPath = argsV.get(argsSt++);
                         break;
                     case OPT_JCMAINCLASS:
                         if (jcExecApp != null) {
                             bailOut(ERR_NO_TWO_COMPILER_OPTIONS);
                         }
-                        jcMainClass = (String) argsV.get(argsSt++);
+                        jcMainClass = argsV.get(argsSt++);
                         break;
                     case OPT_JCMETHOD:
                         if (jcExecApp != null) {
                             bailOut(ERR_NO_TWO_COMPILER_OPTIONS);
                         }
-                        jcMethod = (String) argsV.get(argsSt++);
+                        jcMethod = argsV.get(argsSt++);
                         break;
                     case OPT_JCEXEC:
                         if (jcPath != null || jcMainClass != null || jcMethod != null) {
                             bailOut(ERR_NO_TWO_COMPILER_OPTIONS);
                         }
-                        jcExecApp = (String) argsV.get(argsSt++);
+                        jcExecApp = argsV.get(argsSt++);
                         break;
                     case OPT_TIMING:
                         Utils.setTimingOn();
@@ -191,9 +192,9 @@ public class Main {
                     case OPT_WARNLIMIT:
                         try {
                             Utils.warningLimit =
-                                    Integer.parseInt((String) argsV.get(argsSt++));
+                                    Integer.parseInt(argsV.get(argsSt++));
                         } catch (NumberFormatException e) {
-                            bailOut((String) argsV.get(argsSt) + ERR_IS_INVALID_OPTION);
+                            bailOut(argsV.get(argsSt) + ERR_IS_INVALID_OPTION);
                         }
                         break;
                     case OPT_FAILONDEPJAR:
@@ -210,14 +211,14 @@ public class Main {
                         break;
                     case OPT_BOOTCLASSPATH:
                         try {
-                            setBootClassPath((String) argsV.get(argsSt++));
+                            setBootClassPath(argsV.get(argsSt++));
                         } catch (PublicExceptions.InvalidCmdOptionException ex) {
                             bailOut(ex.getMessage());
                         }
                         break;
                     case OPT_EXTDIRS:
                         try {
-                            setExtDirs((String) argsV.get(argsSt++));
+                            setExtDirs(argsV.get(argsSt++));
                         } catch (PublicExceptions.InvalidCmdOptionException ex) {
                             bailOut(ex.getMessage());
                         }
@@ -240,7 +241,7 @@ public class Main {
     }
 
     /** Load @-file that can contain anything that command line can contain. */
-    private void loadCmdFile(String name, ArrayList argsV) {
+    private void loadCmdFile(String name, List<String> argsV) {
         try {
             Reader r = new BufferedReader(new FileReader(name));
             StreamTokenizer st = new StreamTokenizer(r);
@@ -305,7 +306,7 @@ public class Main {
                     }
                 }
                 allProjectJavaFileNames =
-                        (String[]) allProjectJavaFileNamesList.toArray(new String[allProjectJavaFileNamesList.size()]);
+                        allProjectJavaFileNamesList.toArray(new String[allProjectJavaFileNamesList.size()]);
             } else {
                 String[] projectJars = ClassPath.getProjectJars();
                 if (projectJars != null) {

@@ -21,6 +21,7 @@ import java.util.zip.ZipEntry;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 
 /**
  * An instance of this class represents a class path, on which binary classes can be looked up.
@@ -46,7 +47,7 @@ public class ClassPath {
     private static String compilerUserClassPath; // Class path to be passed to the compiler; equals to the sum of values of parameters of
     // setClassPath() and setProjectClassPath() methods.
     private static String standardClassPathStr,  projectClassPathStr,  bootClassPathStr,  extDirsStr;
-    private static Hashtable classCache;
+    private static Hashtable<String,ClassInfo> classCache;
 
 
     static {
@@ -64,7 +65,7 @@ public class ClassPath {
         compilerUserClassPath = null;
         standardClassPathStr = projectClassPathStr = bootClassPathStr =
                 extDirsStr = null;
-        classCache = new Hashtable();
+        classCache = new Hashtable<String,ClassInfo>();
     }
 
     public static void setClassPath(String value) throws PublicExceptions.InvalidCmdOptionException {
@@ -86,7 +87,7 @@ public class ClassPath {
         extDirsStr = value;
         // Extension class path needs special handling, since it consists of directories, which contain .jars
         // So we need to find all these .jars in all these dirs and add them to extClassPathElementList
-        ArrayList extClassPathElements = new ArrayList();
+        List<String> extClassPathElements = new ArrayList<String>();
         for (StringTokenizer tok =
                 new StringTokenizer(value, File.pathSeparator); tok.hasMoreTokens();) {
             File extDir = new File(tok.nextToken());
@@ -169,9 +170,10 @@ public class ClassPath {
      * will recompile everything when they switch to a new JDK version. The optimization prevents us from wasting time
      * repeatedly loading the same sets of core classes.
      */
-    public static void getSuperclasses(String className, Collection res, PCDManager pcdm) {
+    public static void getSuperclasses(String className, 
+            Collection<String> res, PCDManager pcdm) {
         int iterNo = 0;
-        while (className != "java/lang/Object") {
+        while (!"java/lang/Object".equals(className)) {
             ClassInfo ci = getClassInfoForName(className, pcdm);
             if (ci == null) {
                 return;
@@ -188,8 +190,9 @@ public class ClassPath {
      * projectClassPath or standardClassPath, plus the first interface on each branch that can be loaded from
      * coreClassPath. It's the same optimization as in getSuperclasses().
      */
-    public static void addAllImplementedInterfaceNames(String className, Set intfSet, PCDManager pcdm) {
-        if (className == "java/lang/Object") {
+    public static void addAllImplementedInterfaceNames(String className, 
+            Set<String> intfSet, PCDManager pcdm) {
+        if ("java/lang/Object".equals(className)) {
             return;
         }
         ClassInfo ci = getClassInfoForName(className, pcdm);
@@ -223,7 +226,7 @@ public class ClassPath {
     }
 
     public static ClassInfo getClassInfoForName(String className, PCDManager pcdm) {
-        ClassInfo info = (ClassInfo) classCache.get(className);
+        ClassInfo info = classCache.get(className);
         if (info != null) {
             return info;
         }
@@ -286,7 +289,7 @@ public class ClassPath {
         if (classPath == null) {
             throw new PublicExceptions.InvalidCmdOptionException("null argument");
         }
-        ArrayList vec = new ArrayList();
+        List<String> vec = new ArrayList<String>();
 
         for (StringTokenizer tok =
                 new StringTokenizer(classPath, File.pathSeparator); tok.hasMoreTokens();) {
@@ -296,17 +299,17 @@ public class ClassPath {
         init(vec, isJarOnly);
     }
 
-    private ClassPath(ArrayList pathEntries, boolean isJarOnly) throws PublicExceptions.InvalidCmdOptionException {
+    private ClassPath(List<String> pathEntries, boolean isJarOnly) throws PublicExceptions.InvalidCmdOptionException {
         init(pathEntries, isJarOnly);
     }
 
-    private void init(ArrayList pathEntries, boolean isJarOnly) throws PublicExceptions.InvalidCmdOptionException {
+    private void init(List<String> pathEntries, boolean isJarOnly) throws PublicExceptions.InvalidCmdOptionException {
         if (pathEntries == null) {
             throw new PublicExceptions.InvalidCmdOptionException("null argument");
         }
-        ArrayList vec = new ArrayList(pathEntries.size());
+        List<PathEntry> vec = new ArrayList<PathEntry>(pathEntries.size());
         for (int i = 0; i < pathEntries.size(); i++) {
-            String path = (String) pathEntries.get(i);
+            String path = pathEntries.get(i);
             if (!path.equals("")) {
                 File file = new File(path);
                 try {

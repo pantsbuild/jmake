@@ -23,10 +23,10 @@ public class PCDContainer {
 
     /** The data structure (currently Hashtable) for PCD, that maps class name to
     record containing information about the class */
-    Hashtable pcd;
+    Hashtable<String,PCDEntry> pcd;
     String storeName;
 
-    private PCDContainer(Hashtable pcd, String storeName) {
+    private PCDContainer(Hashtable<String,PCDEntry> pcd, String storeName) {
         this.storeName = storeName;
         this.pcd = pcd;
     }
@@ -39,7 +39,7 @@ public class PCDContainer {
         if (storeFile != null) {
             Utils.printInfoMessageNoEOL("Opening project database...  ");
             byte buf[] = Utils.readFileIntoBuffer(storeFile);
-            Hashtable pcd =
+            Hashtable<String,PCDEntry> pcd =
                     new ProjectDatabaseReader().readProjectDatabase(buf, storeName);
             PCDContainer pcdc = new PCDContainer(pcd, storeName);
             Utils.printInfoMessage("Done.");

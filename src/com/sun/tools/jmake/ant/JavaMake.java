@@ -31,6 +31,7 @@ import org.apache.tools.ant.taskdefs.Javac;
 import java.io.File;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * This class is used when <b>jmake</b> is invoked from within Ant.<P>
@@ -68,7 +69,7 @@ public class JavaMake extends Javac {
     private boolean failOnDependentJar = false;
     private boolean noWarnOnDependentJar = false;
     /** List of all source file names stored as full paths, for this project. */
-    protected ArrayList sourceFileNameList;
+    protected List<String> sourceFileNameList;
     /** Class path for all JARs included in this project. */
     protected Path projClasspath;
 
@@ -101,7 +102,7 @@ public class JavaMake extends Javac {
     /** Adds a path to the project classpath. */
     public Path createProjClasspath() {
         if (projClasspath == null) {
-            projClasspath = new Path(project);
+            projClasspath = new Path(getProject());
         }
         return projClasspath.createPath();
     }
@@ -138,12 +139,12 @@ public class JavaMake extends Javac {
     /** Clear the list of source file names */
     public void resetSourceFileNameList() {
         // Should we use Ant for a project smaller than that? :-)
-        sourceFileNameList = new ArrayList(100);
+        sourceFileNameList = new ArrayList<String>(100);
     }
 
     /** Return the list of source file names as an array */
     public String[] sourceFileNameListArray() {
-        return (String[]) sourceFileNameList.toArray(new String[sourceFileNameList.size()]);
+        return sourceFileNameList.toArray(new String[sourceFileNameList.size()]);
     }
 
     /** Executes the task. */
@@ -164,7 +165,8 @@ public class JavaMake extends Javac {
      */
     protected void scanDir(File srcDir, File destDir, String fileNames[]) {
         String srcDirName = srcDir.getAbsolutePath();
-        if (srcDirName != null && srcDirName != "" && !srcDirName.endsWith(File.separator)) {
+        if (srcDirName != null && (!"".equals(srcDirName)) &&
+                !srcDirName.endsWith(File.separator)) {
             srcDirName += File.separator;
         }
         for (int i = 0; i < fileNames.length; i++) {
@@ -200,10 +202,10 @@ public class JavaMake extends Javac {
         // Get the non-default project database name, if it has been supplied
         String pdbFileName = getPdbFilename();
         if (pdbFileName == null) {
-            pdbFileName = project.getProperty("jmake.pdb.filename");
+            pdbFileName = getProject().getProperty("jmake.pdb.filename");
         }
         File pdbFile =
-                pdbFileName != null ? project.resolveFile(pdbFileName) : null;
+                pdbFileName != null ? getProject().resolveFile(pdbFileName) : null;
 
         com.sun.tools.jmake.Main jmake = new Main();
         try {
@@ -247,7 +249,7 @@ public class JavaMake extends Javac {
                 pdbFile != null ? pdbFile.getAbsolutePath() : null, this, compileSourceFilesMethod);
         if (res != 0) {
             if (failOnError) {
-                throw new BuildException(FAIL_MSG, location);
+                throw new BuildException(FAIL_MSG, getLocation());
             } else {
                 log(FAIL_MSG, Project.MSG_ERR);
             }

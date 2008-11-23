@@ -28,6 +28,7 @@ public class PublicExceptions {
      */
     public static class CompilerInteractionException extends Exception {
 
+        private static final long serialVersionUID = 1L;
         private Exception originalException;
         private int compilerExitCode;
 
@@ -67,6 +68,8 @@ public class PublicExceptions {
     /** Exception signalling a problem with reading project database file. */
     public static class PDBCorruptedException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         PDBCorruptedException(String msg) {
             super(msg);
         }
@@ -75,6 +78,8 @@ public class PublicExceptions {
     /** Exception signalling a problem when parsing a class file */
     public static class ClassFileParseException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         ClassFileParseException(String msg) {
             super(msg);
         }
@@ -82,10 +87,14 @@ public class PublicExceptions {
 
     /** Exception signalling that <b>jmake</b> was not requested to do any real work. */
     public static class NoActionRequestedException extends Exception {
+
+        private static final long serialVersionUID = 1L;
     }
 
     /** Exception signalling that an invalid command line option has been passed to jmake. */
     public static class InvalidCmdOptionException extends Exception {
+
+        private static final long serialVersionUID = 1L;
 
         InvalidCmdOptionException(String msg) {
             super(msg);
@@ -98,6 +107,8 @@ public class PublicExceptions {
      */
     public static class CommandFileReadException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         CommandFileReadException(String msg) {
             super(msg);
         }
@@ -109,6 +120,8 @@ public class PublicExceptions {
      */
     public static class ClassNameMismatchException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         ClassNameMismatchException(String msg) {
             super(msg);
         }
@@ -116,6 +129,8 @@ public class PublicExceptions {
 
     /** Exception thrown if any specified source file has an invalid extension (not <code>.java</code> or <code>.jar</code>). */
     public static class InvalidSourceFileExtensionException extends Exception {
+
+        private static final long serialVersionUID = 1L;
 
         InvalidSourceFileExtensionException(String msg) {
             super(msg);
@@ -125,6 +140,8 @@ public class PublicExceptions {
     /** Exception thrown if a dependence of a class in a <code>JAR</code> file on a class with a <code>.java</code> source is detected. */
     public static class JarDependsOnSourceException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         JarDependsOnSourceException(String msg) {
             super(msg);
         }
@@ -133,6 +150,8 @@ public class PublicExceptions {
     /** Exception thrown if more than one entry for the same class is detected in the project */
     public static class DoubleEntryException extends Exception {
 
+        private static final long serialVersionUID = 1L;
+
         DoubleEntryException(String msg) {
             super(msg);
         }
@@ -140,6 +159,8 @@ public class PublicExceptions {
 
     /** Exception thrown if an internal problem that should never happen is detected. */
     public static class InternalException extends Exception {
+
+        private static final long serialVersionUID = 1L;
 
         InternalException(String msg) {
             super(msg);

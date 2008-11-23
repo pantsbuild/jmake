@@ -15,6 +15,7 @@ package com.sun.tools.jmake;
  */
 public class PrivateException extends RuntimeException {
 
+    private static final long serialVersionUID = 1L;
     private Throwable originalException;
 
     public PrivateException(Throwable e) {

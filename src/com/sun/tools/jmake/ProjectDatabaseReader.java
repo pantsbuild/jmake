@@ -18,17 +18,18 @@ import java.util.Hashtable;
 public class ProjectDatabaseReader extends BinaryFileReader {
 
     private String stringTable[];
-    private Hashtable pcd;
+    private Hashtable<String,PCDEntry> pcd;
     private int nOfEntries;
     private int pdbFormat;  // Currently supported values: 0x01030300 (jmake 1.3.3 and newer versions); 1 (all older versions)
     // These are defined in Utils as PDB_FORMAT_CODE_LATEST and PDB_FORMAT_CODE_OLD
 
-    public Hashtable readProjectDatabase(byte[] pdbFile, String pdbFileFullPath) {
+    public Hashtable<String,PCDEntry> readProjectDatabase(byte[] pdbFile,
+            String pdbFileFullPath) {
         initBuf(pdbFile, pdbFileFullPath);
 
         readPreamble();
         readStringTable();
-        pcd = new Hashtable(nOfEntries * 4 / 3);
+        pcd = new Hashtable<String,PCDEntry>(nOfEntries * 4 / 3);
 
         for (int i = 0; i < nOfEntries; i++) {
             PCDEntry entry = readPCDEntry();
