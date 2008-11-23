@@ -4,7 +4,6 @@
  * the GNU General Public License Version 2. See the LICENSE file
  * at the top of the source tree.
  */
-
 package com.sun.tools.jmake;
 
 /**
@@ -13,15 +12,16 @@ package com.sun.tools.jmake;
  *
  * @author  Misha Dmitriev
  * @date 12 November 2001
-*/
+ */
 public class PrivateException extends RuntimeException {
-  private Throwable originalException;
-  
-  public PrivateException(Throwable e) {
-    originalException = e;
-  }
-  
-  public Throwable getOriginalException() {
-    return originalException;
-  }
+
+    private Throwable originalException;
+
+    public PrivateException(Throwable e) {
+        originalException = e;
+    }
+
+    public Throwable getOriginalException() {
+        return originalException;
+    }
 }
