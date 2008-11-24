@@ -6,7 +6,6 @@
  */
 package com.sun.tools.jmake;
 
-
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 
@@ -252,6 +251,10 @@ public class Utils {
             path = new String(chars);
         }
         return path;
+    }
+
+    public static void ignore(Exception e) {
+        // Ignore this exception
     }
 
     /** Used when invoking a third-party executable compiler app */

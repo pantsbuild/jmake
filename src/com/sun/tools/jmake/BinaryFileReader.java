@@ -33,7 +33,7 @@ public class BinaryFileReader {
     }
 
     protected char getChar(int bufPos) {
-        return (char) (((buf[bufPos++] & 255) << 8) + (buf[bufPos++] & 255));
+        return (char) (((buf[bufPos] & 255) << 8) + (buf[bufPos+1] & 255));
     }
 
     protected int nextInt() {
@@ -42,8 +42,8 @@ public class BinaryFileReader {
     }
 
     protected int getInt(int bufPos) {
-        return ((buf[bufPos++] & 255) << 24) + ((buf[bufPos++] & 255) << 16) +
-                ((buf[bufPos++] & 255) << 8) + (buf[bufPos++] & 255);
+        return ((buf[bufPos] & 255) << 24) + ((buf[bufPos+1] & 255) << 16) +
+                ((buf[bufPos+2] & 255) << 8) + (buf[bufPos+3] & 255);
     }
 
     protected long nextLong() {

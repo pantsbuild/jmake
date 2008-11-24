@@ -36,7 +36,8 @@ public class Main {
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
     static final String VERSION = "1.3.3";
     private String pdbFileName = null;
-    private List<String> allProjectJavaFileNamesList = new ArrayList<String>(100);
+    private List<String> allProjectJavaFileNamesList =
+            new ArrayList<String>(100);
     private String allProjectJavaFileNames[];
     private String addedJavaFileNames[],  removedJavaFileNames[],  updatedJavaFileNames[];
     private String destDir = "";
@@ -88,11 +89,6 @@ public class Main {
             }
         }
         return -1;
-    }
-
-    /** Returns the number of additional arguments for an option number optN. */
-    private static final int getNoOfArgs(int optN) {
-        return optArgs[optN];
     }
 
     private void processCommandLine(String args[]) {
@@ -194,6 +190,7 @@ public class Main {
                             Utils.warningLimit =
                                     Integer.parseInt(argsV.get(argsSt++));
                         } catch (NumberFormatException e) {
+                            Utils.ignore(e);
                             bailOut(argsV.get(argsSt) + ERR_IS_INVALID_OPTION);
                         }
                         break;
@@ -666,7 +663,9 @@ public class Main {
         int exitCode = m.mainExternal(args);
 
         Utils.stopAndPrintTiming("Total", Utils.TIMING_TOTAL);
-        System.exit(exitCode);
+        if ( exitCode != 0 ) {
+            System.exit(exitCode);
+        }
     }
 
     /**

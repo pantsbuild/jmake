@@ -6,9 +6,11 @@
             <name>jmake</name>
             <minimum-ant-version>1.6.5</minimum-ant-version>
             <source-roots>
-                <root id="src.dir"/>
+                <root id="src.dir" name="src"/>
             </source-roots>
-            <test-roots/>
+            <test-roots>
+                <root id="test.test.dir"/>
+            </test-roots>
         </data>
     </configuration>
 </project>

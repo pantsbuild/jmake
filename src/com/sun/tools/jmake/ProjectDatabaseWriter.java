@@ -137,7 +137,7 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
 
         writeChar(ci.accessFlags);
         buf[curBufPos++] = ci.isNonMemberNestedClass ? (byte) 1 : (byte) 0;
-        if (ci.name != "java/lang/Object") {
+        if (!"java/lang/Object".equals(ci.name)) {
             writeStringRef(ci.superName);
         }
 
@@ -292,10 +292,10 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
         final int get(String key) {
             int pos = (key.hashCode() & 0x7FFFFFFF) % size;
 
-            while (keys[pos] != key && keys[pos] != null) {
+            while (keys[pos] != null && !keys[pos].equals(key)) {
                 pos = (pos + 3) % size; // Relies on the fact that size % 3 != 0
             }
-            if (key == keys[pos]) {
+            if (key.equals(keys[pos])) {
                 return values[pos];
             } else {
                 return -1;

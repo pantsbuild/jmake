@@ -82,7 +82,6 @@ public class ClassFileReader extends BinaryFileReader {
 
         cpOffsets = new int[nextChar()];
         cpTags = new byte[cpOffsets.length];
-        int cpStart = curBufPos;
         int ofs, len, classIdx, nameAndTypeIdx, nameIdx, sigIdx, utf8Idx;
         int i = 1;
         while (i < cpOffsets.length) {
@@ -223,7 +222,7 @@ public class ClassFileReader extends BinaryFileReader {
         }
         classInfo.name = classNameAtCPIndex(getChar(cpOffsets[classIdx]));
         superClassIdx = nextChar();
-        if (classInfo.name != "java/lang/Object") {
+        if (!"java/lang/Object".equals(classInfo.name)) {
             if (cpTags[superClassIdx] != CONSTANT_Class) {
                 throw classFileParseException("Bad reference to super class name");
             }
@@ -289,22 +288,22 @@ public class ClassFileReader extends BinaryFileReader {
 
                         case CONSTANT_Integer:
                             classInfo.primitiveConstantInitValues[ri] =
-                                    new Integer(getInt(cpOffsets[constValueIdx]));
+                                    Integer.valueOf(getInt(cpOffsets[constValueIdx]));
                             break;
 
                         case CONSTANT_Long:
                             classInfo.primitiveConstantInitValues[ri] =
-                                    new Long(getLong(cpOffsets[constValueIdx]));
+                                    Long.valueOf(getLong(cpOffsets[constValueIdx]));
                             break;
 
                         case CONSTANT_Float:
                             classInfo.primitiveConstantInitValues[ri] =
-                                    new Float(getFloat(cpOffsets[constValueIdx]));
+                                    Float.valueOf(getFloat(cpOffsets[constValueIdx]));
                             break;
 
                         case CONSTANT_Double:
                             classInfo.primitiveConstantInitValues[ri] =
-                                    new Double(getDouble(cpOffsets[constValueIdx]));
+                                    Double.valueOf(getDouble(cpOffsets[constValueIdx]));
                             break;
 
                         default:

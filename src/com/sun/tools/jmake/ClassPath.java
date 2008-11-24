@@ -22,6 +22,7 @@ import java.util.zip.ZipEntry;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * An instance of this class represents a class path, on which binary classes can be looked up.
@@ -94,7 +95,7 @@ public class ClassPath {
             String[] extJars = extDir.list(new FilenameFilter() {
 
                 public boolean accept(File dir, String name) {
-                    name = name.toLowerCase();
+                    name = name.toLowerCase(Locale.ENGLISH);
                     return name.endsWith(".zip") || name.endsWith(".jar");
                 }
             });
@@ -356,11 +357,11 @@ public class ClassPath {
         if (paths == null) {
             return "NULL";
         }
-        String res = "";
+        StringBuilder res = new StringBuilder();
         for (int i = 0; i < paths.length; i++) {
-            res += paths[i].toString();
+            res.append(paths[i].toString());
         }
-        return res;
+        return res.toString();
     }
 
 
@@ -390,7 +391,7 @@ public class ClassPath {
         }
 
         public String toString() {
-            return dir.toString();
+            return dir;
         }
     }
 

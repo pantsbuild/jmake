@@ -20,6 +20,7 @@ package com.sun.tools.jmake.ant;
 
 import com.sun.tools.jmake.Main;
 
+import com.sun.tools.jmake.Utils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
@@ -191,7 +192,7 @@ public class JavaMake extends Javac {
 
         // Create a method object for method "compileSourceFiles" to call back
         Class thisClass = this.getClass();
-        Method compileSourceFilesMethod = null;
+        Method compileSourceFilesMethod;
         try {
             compileSourceFilesMethod = thisClass.getDeclaredMethod(
                     "compileSourceFiles", new Class[]{String[].class});
@@ -231,7 +232,10 @@ public class JavaMake extends Javac {
             if (path != null) {
                 jmake.setExtDirs(path.toString());
             }
-        } catch (Exception e) { /* Should not happen - Ant has already checked paths */ }
+        } catch (Exception e) {
+            /* Should not happen - Ant has already checked paths */
+            Utils.ignore(e);
+        }
         if (failOnDependentJar || noWarnOnDependentJar) {
             jmake.setResponseOnDependentJar(failOnDependentJar ? Main.DEPJAR_ERROR
                     : Main.DEPJAR_NOWARNORERROR);
@@ -274,6 +278,7 @@ public class JavaMake extends Javac {
             super.compile();   // Deals with compilerAdapters, etc.
             result = 0;
         } catch (BuildException e) {
+            Utils.ignore(e);
             log(FAIL_MSG, Project.MSG_ERR);
             result = -1;
         }

@@ -60,8 +60,6 @@ public class PCDManager {
     private Object externalApp;
     private Method externalCompileSourceFilesMethod;
     private Adler32 checkSum;
-    private static PrintStream out = System.out;
-    private static PrintStream err = System.err;
     private CompatibilityChecker cv;
     private ClassFileReader cfr;
     private boolean newProject = false;
@@ -155,7 +153,7 @@ public class PCDManager {
 
         ClassInfo res = pcde.newClassInfo;
         if (res == null) {
-            byte classFileBytes[] = null;
+            byte classFileBytes[];
             String classFileFullPath = null;
             if (pcde.javaFileFullPath.endsWith(".java")) {
                 File classFile = Utils.checkFileForName(pcde.classFileFullPath);
@@ -249,7 +247,7 @@ public class PCDManager {
             }
             jcPath = javaHome + "/lib/tools.jar";
         }
-        ClassLoader compilerLoader = null;
+        ClassLoader compilerLoader;
         try {
             compilerLoader = ClassPath.getClassLoaderForPath(jcPath);
         } catch (Exception ex) {
@@ -678,6 +676,7 @@ public class PCDManager {
                         exitCode = p.exitValue();
                         terminated = true;
                     } catch (IllegalThreadStateException itse) { // Process not yet terminated, wait for some time
+                        Utils.ignore(itse);
                         Utils.delay(100);
                     }
                     try {
@@ -753,7 +752,7 @@ public class PCDManager {
      */
     private PCDEntry findClassFileOnFilesystem(String javaFileFullPath, PCDEntry enclosingClassPCDE, String nestedClassFullName) {
         String classFileFullPath = null;
-        String fullClassName = null;
+        String fullClassName;
         File classFile = null;
 
         if (enclosingClassPCDE == null) { // Looking for a top-level class. May need to locate an appropriate directory.
@@ -1144,7 +1143,7 @@ public class PCDManager {
      * updated, or moved, and treat them accordingly.
      */
     private void processAllClassesFromJarFile(String jarFileName) {
-        JarFile jarFile = null;
+        JarFile jarFile;
         long jarFileLastMod = 0;
         try {
             File file = new File(jarFileName);
@@ -1166,7 +1165,7 @@ public class PCDManager {
             }
             fullClassName =
                     fullClassName.substring(0, fullClassName.length() - 6).intern();
-            byte classFileBytes[] = null;
+            byte classFileBytes[];
             classFileBytes = Utils.readZipEntryIntoBuffer(jarFile, jarEntry);
             long classFileFP = computeFP(classFileBytes);
 
@@ -1180,7 +1179,8 @@ public class PCDManager {
                 pcde.newClassFileLastModified = jarFileLastMod;
                 // If we are scanning an existing updated .jar file, and there is no change to the class itself,
                 // and it previously was located in the same .jar, do nothing.
-                if (pcde.oldClassFileFingerprint == classFileFP && pcde.javaFileFullPath == jarFileName) {
+                if (pcde.oldClassFileFingerprint == classFileFP &&
+                        pcde.javaFileFullPath.equals(jarFileName)) {
                     pcde.oldClassFileLastModified = jarFileLastMod;   // So that next time jmake is inoked, checking
                     continue;                                         // of this.jar is not triggered.
                 }
@@ -1197,7 +1197,7 @@ public class PCDManager {
                 } else {
                     pcde.oldClassFileLastModified = jarFileLastMod;
                 }
-                if (pcde.javaFileFullPath != jarFileName) {
+                if (!pcde.javaFileFullPath.equals(jarFileName)) {
                     // Found an existing class in a different .jar file.
                     // May happen if the class file has been moved from one .jar to another (or into a .jar, losing its
                     // .java source). It's only at this point that we can actually see that it was really a move.

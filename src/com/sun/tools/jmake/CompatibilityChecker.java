@@ -487,8 +487,10 @@ public class CompatibilityChecker {
                         void handleMethod(ClassInfo classInfo, int methodIdx) {
                             String otherMSig =
                                     classInfo.methodSignatures[methodIdx];
-                            if ((newMSig == otherMSig && isStatic && classInfo != oldClassInfo) ||
-                                    (newMSig != otherMSig && Utils.sameParamNumber(newMSig, otherMSig))) {
+                            if ((newMSig == otherMSig && isStatic &&
+                                    classInfo != oldClassInfo) ||
+                                    (newMSig != otherMSig &&
+                                    Utils.sameParamNumber(newMSig, otherMSig))) {
                                 versionsCompatible = false;
                                 rf.findReferencingClassesForMethod(classInfo, methodIdx);
                             }
@@ -509,7 +511,6 @@ public class CompatibilityChecker {
                 }
             } else {  // We are checking an interface.
                 for (i = 0; i < nMLen; i++) {
-                    nMMod = nMFlags[i];
                     String newMName = nMNames[i];
                     final String newMSig = nMSignatures[i];
 
@@ -531,7 +532,8 @@ public class CompatibilityChecker {
                             void handleMethod(ClassInfo classInfo, int methodIdx) {
                                 String otherMSig =
                                         classInfo.methodSignatures[methodIdx];
-                                if (newMSig != otherMSig && Utils.sameParamNumber(newMSig, otherMSig)) {
+                                if (newMSig != otherMSig &&
+                                        Utils.sameParamNumber(newMSig, otherMSig)) {
                                     rf.findReferencingClassesForMethod(classInfo, methodIdx);
                                 }
                             }

@@ -179,7 +179,8 @@ public class ClassInfo {
             }
         }
 
-        if (directOnly || superName == null || superName == "java/lang/Object") {
+        if (directOnly || superName == null || 
+                "java/lang/Object".equals(superName)) {
             return;
         }
         ClassInfo superInfo = pcdm.getClassInfoForName(verCode, superName);
@@ -235,7 +236,7 @@ public class ClassInfo {
                 return false;
             }
         } else if (oldInitValue instanceof String) {
-            if (((String) oldInitValue) == ((String) newInitValue)) {
+            if ( ((String) oldInitValue).equals((String) newInitValue) ) {
                 return true;
             } else {
                 return false;
@@ -268,7 +269,7 @@ public class ClassInfo {
             return false;
         }
         for (int i = 0; i < interfaces.length; i++) {
-            if (intfName == interfaces[i]) {
+            if (intfName.equals(interfaces[i])) {
                 return true;
             }
         }
@@ -281,7 +282,7 @@ public class ClassInfo {
             return false;
         }
         for (int i = 0; i < interfaces.length; i++) {
-            if (intfName == interfaces[i]) {
+            if (intfName.equals(interfaces[i])) {
                 return true;
             }
             // An interface can have multiple superinterfaces, all of which are listed in its "interfaces" array
@@ -334,7 +335,8 @@ public class ClassInfo {
         String fieldSignature = classInfo.fieldSignatures[fieldNo];
 
         for (int i = 0; i < fieldNames.length; i++) {
-            if (fieldName == fieldNames[i] && fieldSignature == fieldSignatures[i]) {
+            if (fieldName.equals(fieldNames[i]) &&
+                    fieldSignature.equals(fieldSignatures[i])) {
                 return true;
             }
         }
@@ -348,7 +350,9 @@ public class ClassInfo {
         }
         signature = ("@" + signature + "#").intern();
         for (int i = 0; i < fieldNames.length; i++) {
-            if (name == fieldNames[i] && signature == fieldSignatures[i] && Modifier.isStatic(fieldAccessFlags[i]) == isStatic) {
+            if (name.equals(fieldNames[i]) &&
+                    signature.equals(fieldSignatures[i]) &&
+                    Modifier.isStatic(fieldAccessFlags[i]) == isStatic) {
                 return true;
             }
         }
@@ -367,7 +371,8 @@ public class ClassInfo {
         String methodSignature = classInfo.methodSignatures[methodNo];
 
         for (int i = 0; i < methodNames.length; i++) {
-            if (methodName == methodNames[i] && methodSignature == methodSignatures[i]) {
+            if (methodName.equals(methodNames[i]) &&
+                    methodSignature.equals(methodSignatures[i])) {
                 return true;
             }
         }
@@ -386,7 +391,8 @@ public class ClassInfo {
         String methodSignature = classInfo.methodSignatures[methodNo];
 
         for (int i = 0; i < methodNames.length; i++) {
-            if (methodName == methodNames[i] && methodSignature == methodSignatures[i]) {
+            if (methodName.equals(methodNames[i]) &&
+                    methodSignature.equals(methodSignatures[i])) {
                 return i;
             }
         }
@@ -402,7 +408,7 @@ public class ClassInfo {
             return -1;
         }
         for (int j = 0; j < methodNames.length; j++) {
-            if (methodNames[j] == methodName) {
+            if (methodName.equals(methodNames[j])) {
                 return j;
             }
         }
@@ -431,7 +437,8 @@ public class ClassInfo {
                 return false;
             }
             for (i = 0; i < cpoolRefsToClasses.length; i++) {
-                if (!isRefClassArray[i] && className == cpoolRefsToClasses[i]) {
+                if (!isRefClassArray[i] &&
+                        className.equals(cpoolRefsToClasses[i])) {
                     return true;
                 }
             }
@@ -454,7 +461,7 @@ public class ClassInfo {
 
             if (cpoolRefsToClasses != null) {
                 for (i = 0; i < cpoolRefsToClasses.length; i++) {
-                    if (className == cpoolRefsToClasses[i]) {
+                    if (className.equals(cpoolRefsToClasses[i])) {
                         return true;
                     }
                 }
@@ -496,7 +503,7 @@ public class ClassInfo {
                     if (checkedExceptions[i] != null) {
                         String excArray[] = checkedExceptions[i];
                         for (int j = 0; j < excArray.length; j++) {
-                            if (className == excArray[j]) {
+                            if (className.equals(excArray[j])) {
                                 return true;
                             }
                         }
@@ -518,7 +525,7 @@ public class ClassInfo {
     }
 
     public boolean isSubclassOf(String className, boolean directOnly) {
-        if (className == superName) {
+        if (className.equals(superName)) {
             return true;
         }
         if (directOnly) {
@@ -526,7 +533,7 @@ public class ClassInfo {
         }
         String superName = this.superName;
         while (superName != null) {
-            if (className == superName) {
+            if (className.equals(superName)) {
                 return true;
             }
             ClassInfo classInfo = pcdm.getClassInfoForName(verCode, superName);
@@ -553,7 +560,8 @@ public class ClassInfo {
         String fieldName = fieldDefClassInfo.fieldNames[fieldNo];
         String fieldSig = fieldDefClassInfo.fieldSignatures[fieldNo];
         for (int i = 0; i < cpoolRefsToFieldNames.length; i++) {
-            if (fieldName == cpoolRefsToFieldNames[i] && fieldSig == cpoolRefsToFieldSignatures[i]) {
+            if (fieldName == cpoolRefsToFieldNames[i] &&
+                    fieldSig == cpoolRefsToFieldSignatures[i]) {
                 if (fieldDefClassName == cpoolRefsToFieldClasses[i]) {
                     return true;  // "real" reference
                 } else {  // Check if this is a "fake" reference that resolves to the above "real" reference
@@ -605,7 +613,8 @@ public class ClassInfo {
         String methodName = methodDefClassInfo.methodNames[methodNo];
         String methodSig = methodDefClassInfo.methodSignatures[methodNo];
         for (int i = 0; i < cpoolRefsToMethodNames.length; i++) {
-            if (methodName == cpoolRefsToMethodNames[i] && methodSig == cpoolRefsToMethodSignatures[i]) {
+            if (methodName == cpoolRefsToMethodNames[i] &&
+                    methodSig == cpoolRefsToMethodSignatures[i]) {
                 if (methodDefClassName == cpoolRefsToMethodClasses[i]) {
                     return true;  // "real" reference
                 } else {  // Check if this is a "fake" reference that resolves to the above "real" reference
@@ -690,7 +699,7 @@ public class ClassInfo {
             String mNames[] = classInfo.methodNames;
             int mNamesLen = mNames != null ? mNames.length : 0;
             for (int i = 0; i < mNamesLen; i++) {
-                if (methodName == mNames[i]) {
+                if (methodName.equals(mNames[i])) {
                     h.handleMethod(classInfo, i);
                 }
             }

@@ -148,7 +148,7 @@ public class ProjectDatabaseReader extends BinaryFileReader {
 
         res.accessFlags = nextChar();
         res.isNonMemberNestedClass = (buf[curBufPos++] != 0);
-        if (res.name != "java/lang/Object") {
+        if (!"java/lang/Object".equals(res.name)) {
             res.superName = nextStringRef();
         }
 
@@ -190,17 +190,17 @@ public class ProjectDatabaseReader extends BinaryFileReader {
                         primitiveConstantInitValues[i] = nextStringRef();
                         break;
                     case 2:
-                        primitiveConstantInitValues[i] = new Integer(nextInt());
+                        primitiveConstantInitValues[i] = Integer.valueOf(nextInt());
                         break;
                     case 3:
-                        primitiveConstantInitValues[i] = new Long(nextLong());
+                        primitiveConstantInitValues[i] = Long.valueOf(nextLong());
                         break;
                     case 4:
-                        primitiveConstantInitValues[i] = new Float(nextFloat());
+                        primitiveConstantInitValues[i] = Float.valueOf(nextFloat());
                         break;
                     case 5:
                         primitiveConstantInitValues[i] =
-                                new Double(nextDouble());
+                                Double.valueOf(nextDouble());
                         break;
                     default:  // Nothing to do
                 }

@@ -137,7 +137,8 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (packageName == clientInfo.packageName || clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
+            if (packageName == clientInfo.packageName ||
+                    clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
                 continue;
             }
             if (clientInfo.referencesClass(classInfo.name, classInfo.isInterface(), 1)) {
@@ -156,7 +157,8 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -182,11 +184,13 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (clientInfo.packageName != packageName && !clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
+            if (clientInfo.packageName != packageName &&
+                    !clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
                 continue;
             }
             if (clientInfo.topLevelEnclosingClass == topLevelEnclosingClass) {
@@ -209,7 +213,8 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -234,7 +239,8 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -258,7 +264,8 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -510,11 +517,13 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo classInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (classInfo == null) {
                 continue;  // New class
             }
-            if (packageToLookIn != null && classInfo.packageName != packageToLookIn) {
+            if (packageToLookIn != null && 
+                    !classInfo.packageName.equals(packageToLookIn)) {
                 continue;
             }
             if (classInfo.declaresField(name, signature, isStatic)) {
@@ -592,7 +601,8 @@ public class RefClassFinder {
         Enumeration pcdEntries = pcdm.entriesEnum();
         while (pcdEntries.hasMoreElements()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
+                    (PCDEntry) pcdEntries.nextElement());
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -652,7 +662,8 @@ public class RefClassFinder {
      * Checks if member memberNo (which is a field if isField == true, and method otherwise) of class memberClassInfo is
      * accessible from class clientClassInfo.
      */
-    private boolean memberAccessibleFrom(ClassInfo memberClassInfo, int memberNo, ClassInfo clientClassInfo, boolean isField) {
+    private boolean memberAccessibleFrom(ClassInfo memberClassInfo,
+            int memberNo, ClassInfo clientClassInfo, boolean isField) {
         char memberClassFlags = memberClassInfo.accessFlags;
         char memberFlags = isField ? memberClassInfo.fieldAccessFlags[memberNo]
                 : memberClassInfo.methodAccessFlags[memberNo];
@@ -663,23 +674,28 @@ public class RefClassFinder {
             if (Modifier.isPublic(memberFlags)) {
                 return true;
             } else if (Modifier.isProtected(memberFlags) &&
-                    (memberClassPackage == clientClassPackage || clientClassInfo.isSubclassOf(memberClassInfo.name, false))) {
+                    (memberClassPackage == clientClassPackage ||
+                    clientClassInfo.isSubclassOf(memberClassInfo.name, false))) {
                 return true;
             } else if (Modifier.isPrivate(memberFlags)) {
-                if (memberClassInfo.topLevelEnclosingClass == clientClassInfo.topLevelEnclosingClass) {
+                if (memberClassInfo.topLevelEnclosingClass ==
+                        clientClassInfo.topLevelEnclosingClass) {
                     return true;
                 }
             } else if (memberClassPackage == clientClassPackage) {
                 return true;
             }
         } else if (Modifier.isProtected(memberClassFlags)) {
-            if (!(memberClassPackage == clientClassPackage || clientClassInfo.isSubclassOf(memberClassInfo.directlyEnclosingClass, false))) {
+            if (!(memberClassPackage == clientClassPackage ||
+                    clientClassInfo.isSubclassOf(memberClassInfo.directlyEnclosingClass, false))) {
                 return true;
             }
-            if (Modifier.isPublic(memberFlags) || Modifier.isProtected(memberFlags)) {
+            if (Modifier.isPublic(memberFlags) ||
+                    Modifier.isProtected(memberFlags)) {
                 return true;
             } else if (Modifier.isPrivate(memberFlags)) {
-                if (memberClassInfo.topLevelEnclosingClass == clientClassInfo.topLevelEnclosingClass) {
+                if (memberClassInfo.topLevelEnclosingClass ==
+                        clientClassInfo.topLevelEnclosingClass) {
                     return true;
                 }
             } else {
@@ -688,7 +704,8 @@ public class RefClassFinder {
                 }
             }
         } else if (Modifier.isPrivate(memberClassFlags)) {
-            if (memberClassInfo.topLevelEnclosingClass == clientClassInfo.topLevelEnclosingClass) {
+            if (memberClassInfo.topLevelEnclosingClass ==
+                    clientClassInfo.topLevelEnclosingClass) {
                 return true;
             }
         } else {  // memberClassInfo is package-private
