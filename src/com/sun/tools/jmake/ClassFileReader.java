@@ -25,6 +25,7 @@ public class ClassFileReader extends BinaryFileReader {
     public static final int DEFAULT_MINOR_VERSION = 0;
     public static final int JDK14_MAJOR_VERSION = 48;
     public static final int JDK15_MAJOR_VERSION = 49;
+    public static final int JDK16_MAJOR_VERSION = 50;
     public static final int CONSTANT_Utf8 = 1;
     public static final int CONSTANT_Unicode = 2;
     public static final int CONSTANT_Integer = 3;
@@ -56,6 +57,10 @@ public class ClassFileReader extends BinaryFileReader {
         }
     }
 
+    private int versionWord(int major, int minor) {
+        return major * 1000 + minor;
+    }
+
     private void readPreamble() {
         int magic = nextInt();
         if (magic != JAVA_MAGIC) {
@@ -64,8 +69,11 @@ public class ClassFileReader extends BinaryFileReader {
         int minorVersion = nextChar();
         int majorVersion = nextChar();
         if (majorVersion > JDK14_MAJOR_VERSION ||
-                majorVersion * 1000 + minorVersion < JAVA_MIN_MAJOR_VERSION * 1000 + JAVA_MIN_MINOR_VERSION) {
-            if (majorVersion == JDK15_MAJOR_VERSION) {
+                versionWord(majorVersion, minorVersion) <
+                versionWord(JAVA_MIN_MAJOR_VERSION, JAVA_MIN_MINOR_VERSION) ) {
+            if (majorVersion == JDK16_MAJOR_VERSION) {
+                classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_16;
+            } else if (majorVersion == JDK15_MAJOR_VERSION) {
                 classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_15;
             } else {
                 throw classFileParseException("Wrong version: " + majorVersion + "." + minorVersion);

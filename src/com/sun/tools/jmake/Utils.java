@@ -33,6 +33,7 @@ public class Utils {
     static final int PDB_FORMAT_CODE_LATEST = PDB_FORMAT_CODE_133;
     static final int JAVAC_TARGET_RELEASE_OLDEST = 0x01040000;  // 1.4 and previous versions
     static final int JAVAC_TARGET_RELEASE_15 = 0x01050000;  // if class is compiled with -target 1.5
+    static final int JAVAC_TARGET_RELEASE_16 = 0x01060000;  // if class is compiled with -target 1.6
     static int warningLimit = 20;  // Maximum number of warnings to print
     static final int TIMING_TOTAL = 0;
     static final int TIMING_PDBREAD = 1;
@@ -85,7 +86,7 @@ public class Utils {
             return "";
         }
 
-        if (javacTargetRelease == JAVAC_TARGET_RELEASE_15) {
+        if (javacTargetRelease >= JAVAC_TARGET_RELEASE_15) {
             return clazzName.substring(0, ldi).intern();
         } else {   // JAVAC_TARGET_RELEASE_OLDEST or unknown
             // Take into account local classes which are named like "EncClass$1$LocalClass", where EncClass
