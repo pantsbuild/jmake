@@ -20,6 +20,7 @@ public class PCDEntry {
     static final int CV_INCOMPATIBLE = 2;
     static final int CV_DELETED = 3;
     static final int CV_NEW = 4;
+    static final int CV_NEWER_FOUND_NEARER = 5;
     String className;           // Dots are replaced with slashes for convenience
     transient String classFileFullPath;
     String javaFileFullPath;

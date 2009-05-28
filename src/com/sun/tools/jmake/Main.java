@@ -34,7 +34,7 @@ import java.util.List;
 public class Main {
 
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
-    static final String VERSION = "1.3.4";
+    static final String VERSION = "1.3.5";
     private String pdbFileName = null;
     private List<String> allProjectJavaFileNamesList =
             new ArrayList<String>(100);
@@ -50,8 +50,8 @@ public class Main {
     private boolean failOnDependentJar = false,  noWarnOnDependentJar = false;
     private PCDManager pcdm;
     private static final String optNames[] = {"-h", "-help", "-d", "-pdb", "-C", "-jcpath", "-jcmainclass", "-jcmethod", "-jcexec", "-Xtiming", "-version",
-        "-warnlimit", "-failondependentjar", "-nowarnondependentjar", "-classpath", "-projclasspath", "-bootclasspath", "-extdirs"};
-    private static final int optArgs[] = {0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1};
+        "-warnlimit", "-failondependentjar", "-nowarnondependentjar", "-classpath", "-projclasspath", "-bootclasspath", "-extdirs", "-vpath"};
+    private static final int optArgs[] = {0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1};
     private static final int OPT_H = 0;
     private static final int OPT_HELP = 1;
     private static final int OPT_D = 2;
@@ -70,6 +70,7 @@ public class Main {
     private static final int OPT_PROJECTCLASSPATH = 15;
     private static final int OPT_BOOTCLASSPATH = 16;
     private static final int OPT_EXTDIRS = 17;
+    private static final int OPT_VPATH = 18;
 
     /** Construct a new instance of Main. */
     public Main() {
@@ -216,6 +217,13 @@ public class Main {
                     case OPT_EXTDIRS:
                         try {
                             setExtDirs(argsV.get(argsSt++));
+                        } catch (PublicExceptions.InvalidCmdOptionException ex) {
+                            bailOut(ex.getMessage());
+                        }
+                        break;
+                    case OPT_VPATH:
+                        try {
+                            setVirtualPath(argsV.get(argsSt++));
                         } catch (PublicExceptions.InvalidCmdOptionException ex) {
                             bailOut(ex.getMessage());
                         }
@@ -756,6 +764,22 @@ public class Main {
     public static void setExtDirs(String dirs) throws PublicExceptions.InvalidCmdOptionException {
         ClassPath.setExtDirs(dirs);
     }
+
+    /**
+     * Set the virtual path used to find both source and class files that are part of the project
+     * but are not in the local directory.
+     *
+     * @see #setClassPath(String)
+     *
+     * @param dirs   the value of extension directories, in the usual format (one or more directory names
+     *               separated by colon or semicolon depending on the platform).
+     *
+     * @throws PublicExceptions.InvalidCmdOptionException   if invalid path value is specified.
+     */
+    public static void setVirtualPath(String dirs) throws PublicExceptions.InvalidCmdOptionException {
+        ClassPath.setVirtualPath(dirs);
+    }
+
     /** Produce no warning or error message upon a dependent <code>JAR</code> detection. */
     public static final int DEPJAR_NOWARNORERROR = 0;
     /** Produce a warning upon a dependent <code>JAR</code> detection. */
@@ -854,6 +878,7 @@ public class Main {
         Utils.printInfoMessage("  -warnlimit <number>   specify the maximum number of warnings (20 by default)");
         Utils.printInfoMessage("  -bootclasspath <path> override location of bootstrap class files");
         Utils.printInfoMessage("  -extdirs <dirs>       override location of installed extensions");
+        Utils.printInfoMessage("  -vpath <dirs>         a list of directories to search for Java and class files similar to GNUMake's VPATH");
         Utils.printInfoMessage("");
         Utils.printInfoMessage("Examples:");
         Utils.printInfoMessage("  jmake -d classes -classpath .;mylib.jar X.java Y.java Z.java");

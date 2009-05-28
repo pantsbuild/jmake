@@ -38,16 +38,18 @@ public class ClassPath {
     private static ClassPath projectClassPath;   // Class path (currently it can contain only JARs) containing sourceless project classes.
     // See also the comment to standardClassPath.
     private static ClassPath standardClassPath;  // Class path that the user specifies via the -classpath option. A sum of the
-    // standardClassPath and the projectClassPath is passed to the compiler. Both of these
+    // standardClassPath, the projectClassPath, and the virtualPath is passed to the compiler. Each of these
     // class paths are also used to look up non-project superclasses/superinterfaces of
     // project classes.
     private static ClassPath bootClassPath,  extClassPath; // Class paths that by default are sun.boot.class.path and all JARs on
     // java.ext.class.path, respectively. They are used to look up non-project
     // superclasses/superinterfaces of project classes. Their values can be changed using
     // setBootClassPath() and setExtDirs().
+    private static ClassPath virtualPath; // Class path that the user specifies via the -vpath option.
     private static String compilerUserClassPath; // Class path to be passed to the compiler; equals to the sum of values of parameters of
     // setClassPath() and setProjectClassPath() methods.
-    private static String standardClassPathStr,  projectClassPathStr,  bootClassPathStr,  extDirsStr;
+    private static String standardClassPathStr,  projectClassPathStr,  bootClassPathStr,  extDirsStr,
+            virtualPathStr;
     private static Hashtable<String,ClassInfo> classCache;
 
 
@@ -61,11 +63,11 @@ public class ClassPath {
      * of jmake, may interfere with the current settings.
      */
     public static void resetOnFinish() {
-        projectClassPath = standardClassPath = bootClassPath = extClassPath =
+        projectClassPath = standardClassPath = bootClassPath = extClassPath = virtualPath =
                 null;
         compilerUserClassPath = null;
         standardClassPathStr = projectClassPathStr = bootClassPathStr =
-                extDirsStr = null;
+                extDirsStr = virtualPathStr = null;
         classCache = new Hashtable<String,ClassInfo>();
     }
 
@@ -109,6 +111,22 @@ public class ClassPath {
         extClassPath = new ClassPath(extClassPathElements, false);
     }
 
+    public static void setVirtualPath(String value) throws PublicExceptions.InvalidCmdOptionException {
+        if (value == null) {
+            throw new PublicExceptions.InvalidCmdOptionException("null argument");
+        }
+        StringTokenizer st = new StringTokenizer(value, File.pathSeparator);
+        while (st.hasMoreElements()) {
+            String dir = st.nextToken();
+            if ( ! (new File(dir)).isDirectory()) {
+                throw new PublicExceptions.InvalidCmdOptionException("Virtual path must contain only directories." +
+                        " Entry " + dir + " is not a directory.");
+            }
+        }
+        virtualPathStr = value;
+        virtualPath = new ClassPath(value, false);
+    }
+
     public static void initializeAllClassPaths() {
         // First set the compiler class path value
         if (standardClassPathStr == null && projectClassPathStr == null) {
@@ -122,9 +140,17 @@ public class ClassPath {
                     standardClassPathStr + File.pathSeparator + projectClassPathStr;
         }
 
+        if (virtualPathStr != null) {
+            compilerUserClassPath += File.pathSeparator + virtualPathStr;
+        }
+
         if (standardClassPathStr == null) {
             try {
-                standardClassPath = new ClassPath(".", false);
+                String tmp = ".";
+                if (virtualPathStr != null) {
+                    tmp += File.pathSeparator + virtualPathStr;
+                }
+                standardClassPath = new ClassPath(tmp, false);
             } catch (PublicExceptions.InvalidCmdOptionException ex) { /* Should not happen */ }
         }
         if (projectClassPathStr == null) {
@@ -162,6 +188,11 @@ public class ClassPath {
     /** Will return null if extdirs weren't explicitly specified */
     public static String getCompilerExtDirs() {
         return extDirsStr;
+    }
+
+    /** Will return null if virtualPath wasn't explicitly specified */
+    public static String getVirtualPath() {
+        return virtualPathStr;
     }
 
     /**

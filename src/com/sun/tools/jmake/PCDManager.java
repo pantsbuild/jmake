@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * This class implements management of the Project Class Directory, automatic tracking
@@ -330,6 +331,10 @@ public class PCDManager {
             Utils.stopAndPrintTiming("Check updated classes", Utils.TIMING_CHECK_UPDATED_CLASSES);
 
             updatedClasses = new HashSet<String>();
+            if (ClassPath.getVirtualPath() != null) {
+                if (res != 0)
+                    break;
+            }
         }
 
         Utils.startTiming(Utils.TIMING_PDBWRITE);
@@ -411,7 +416,62 @@ public class PCDManager {
                 PCDEntry e = pcd.get(key);
                 e.oldClassInfo.restorePCDM(this);
                 if (!canonicalPJF.contains(e.javaFileFullPath)) {
-                    deletedClasses.add(key);
+                    if (ClassPath.getVirtualPath() == null) {
+                        deletedClasses.add(key);
+                    } else {
+                        // Okay, not found locally, but virtual path was defined, so try it now....
+                        if ( (e.oldClassFileFingerprint == projectJavaAndJarFilesArray.length &&
+                                newJavaFiles.size() == 0) ||
+                                Utils.checkFileForName(e.javaFileFullPath) != null)
+                        {
+                            e.checkResult = PCDEntry.CV_NEWER_FOUND_NEARER;
+                            e.oldClassFileFingerprint = projectJavaAndJarFilesArray.length;
+                        }
+                        else
+                        {
+                            String classFound = null;
+                            String sourceFound = null;
+                            // Find source and class file via virtual path
+                            String path = ClassPath.getVirtualPath();
+                            for (StringTokenizer st = new StringTokenizer(path, File.pathSeparator);
+                                !(classFound != null && sourceFound != null) && st.hasMoreTokens();)
+                            {
+                                String fullPath = st.nextToken()+File.separator+e.className;
+                                if (sourceFound != null && new File(fullPath+".java").exists())
+                                {
+                                    sourceFound = fullPath + ".java";
+                                }
+                                if (classFound != null && new File(fullPath+".class").exists())
+                                {
+                                    classFound = fullPath + ".class";
+                                }
+                            }
+                            if (classFound == null)
+                            {
+                                deletedClasses.add(key);
+                                if (e.javaFileFullPath.endsWith(".jar"))
+                                {
+                                    deletedJarFiles.add(e.javaFileFullPath);
+                                }
+                                else
+                                {
+                                    initializeClassFileFullPath(e);
+                                    (new File(e.classFileFullPath)).delete();
+                                }
+                            }
+                            else if (sourceFound != null)
+                            {
+                                newJavaFiles.add(sourceFound);
+                                e.checkResult = PCDEntry.CV_NEWER_FOUND_NEARER;
+                                e.oldClassFileFingerprint = projectJavaAndJarFilesArray.length;
+                            }
+                            else
+                            {
+                                classFound = classFound.replace('/', File.separatorChar);
+                                throw new PrivateException(new FileNotFoundException("deleted class " + classFound + " still exists."));
+                            }
+                        }
+                    }
                     if (e.javaFileFullPath.endsWith(".jar")) {
                         deletedJarFiles.add(e.javaFileFullPath);
                     } else {  // Try to delete a class file for the removed project class.
@@ -497,6 +557,11 @@ public class PCDManager {
             if (entry.checkResult == PCDEntry.CV_UNCHECKED) {
                 continue;
             }
+            if (ClassPath.getVirtualPath() != null) {
+                if (entry.checkResult == PCDEntry.CV_NEWER_FOUND_NEARER) {
+                    continue;
+                }
+            }
             if (entry.checkResult == PCDEntry.CV_DELETED) {
                 if (compilationResult == 0) {
                     pcd.remove(className);  // Only if consistency checking is ok, a deleted class can be safely removed from the PCD
@@ -564,6 +629,16 @@ public class PCDManager {
     }
 
     private boolean classFileObsoleteOrDeleted(PCDEntry entry) {
+        if (ClassPath.getVirtualPath() != null) {
+            File file1 = new File(entry.javaFileFullPath);
+            if (file1 == null)
+                throw new PrivateException(new FileNotFoundException("specified source file " +
+                        entry.javaFileFullPath + " not found."));
+            if (file1.lastModified() <= entry.oldClassFileLastModified)
+            {
+                return false;
+            }
+        }
         File classFile = Utils.checkFileForName(entry.classFileFullPath);
         if (classFile == null || !classFile.exists()) {
             return true; // Class file has been deleted
@@ -844,9 +919,16 @@ public class PCDManager {
         if (pcd.containsKey(fullClassName)) {
             PCDEntry pcde = (PCDEntry) pcd.get(fullClassName);
             // If this entry has already been checked, it's a second entry for the same class, which is illegal.
-            if (pcde.checked) {
-                throw new PrivateException(new PublicExceptions.DoubleEntryException(
-                        "Two entries for class " + classInfo.name + " detected: " + pcde.javaFileFullPath + " and " + javaFileFullPath));
+            if (pcde.checkResult == PCDEntry.CV_NEWER_FOUND_NEARER) {
+                // Newer copy of same file found in closer layer
+                // Reset to CV_UNCHECKED and skip redundnacy check
+                // as we know this would be redundant
+                pcde.checkResult = PCDEntry.CV_UNCHECKED;
+            } else {
+                if (pcde.checked) {
+                    throw new PrivateException(new PublicExceptions.DoubleEntryException(
+                            "Two entries for class " + classInfo.name + " detected: " + pcde.javaFileFullPath + " and " + javaFileFullPath));
+                }
             }
             // Otherwise, it means that the .java file for this class has been moved. jmake initially interprets
             // a new source file name as a new class, and it's only at this point that we can actually see that it was
@@ -1007,7 +1089,15 @@ public class PCDManager {
             if (!entry.javaFileFullPath.endsWith(".java")) {
                 continue; // classes from (updated) .jars have been dealt with separately
             }
-            if (classFileUpdated(entry)) {
+            //DAB TODO understand this bit better.  It is needed to support -vpath, I'm just not sure why....
+            if (entry.checkResult != PCDEntry.CV_NEWER_FOUND_NEARER &&
+                    !updatedAndCheckedClasses.contains(className) &&
+                    !deletedClasses.contains(className) &&
+                    entry.javaFileFullPath.endsWith(".java") &&
+                    classFileUpdated(entry))
+            {
+            //DAB TODO this is the old way....
+            //DAB    if (classFileUpdated(entry)) {
                 updatedClasses.add(className);
                 allUpdatedClasses.add(className);
             }
