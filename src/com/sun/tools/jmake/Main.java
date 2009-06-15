@@ -34,7 +34,7 @@ import java.util.List;
 public class Main {
 
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
-    static final String VERSION = "1.3.5";
+    static final String VERSION = "1.3.6";
     private String pdbFileName = null;
     private List<String> allProjectJavaFileNamesList =
             new ArrayList<String>(100);
@@ -48,7 +48,7 @@ public class Main {
     Object externalApp = null;
     Method externalCompileSourceFilesMethod = null;
     private boolean failOnDependentJar = false,  noWarnOnDependentJar = false;
-    private PCDManager pcdm;
+    private PCDManager pcdm = null;
     private static final String optNames[] = {"-h", "-help", "-d", "-pdb", "-C", "-jcpath", "-jcmainclass", "-jcmethod", "-jcexec", "-Xtiming", "-version",
         "-warnlimit", "-failondependentjar", "-nowarnondependentjar", "-classpath", "-projclasspath", "-bootclasspath", "-extdirs", "-vpath"};
     private static final int optArgs[] = {0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1};

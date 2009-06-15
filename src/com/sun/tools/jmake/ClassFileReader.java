@@ -38,7 +38,7 @@ public class ClassFileReader extends BinaryFileReader {
     public static final int CONSTANT_Methodref = 10;
     public static final int CONSTANT_InterfaceMethodref = 11;
     public static final int CONSTANT_NameandType = 12;
-    private ClassInfo classInfo;
+    private ClassInfo classInfo = null;
     private int cpOffsets[];
     private Object cpObjectCache[];
     private byte cpTags[];

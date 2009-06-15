@@ -27,9 +27,9 @@ public class ClassInfo {
     public static final int NO_VERSIONS = 2;  // Non-project class, no change tracking
     private PCDManager pcdm;
     int verCode;                          // Version code for this ClassInfo - one of the above.
-    String name;
+    String name = null;
     String packageName;                   // Package name; restored when database is reloaded
-    int javacTargetRelease;               // Can have values from Utils.JAVAC_TARGET_RELEASE_xxx
+    int javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_OLDEST; // Can have values from Utils.JAVAC_TARGET_RELEASE_xxx
     String cpoolRefsToClasses[];          // Directly referenced class names trimmed of array and 'L' prefixes and ';' suffixes
     boolean isRefClassArray[];            // Indicates if a directly referenced class is actually an array class
     // In all signatures we replace the 'L' and ';' symbols that enclose non-primitive type names with '@' and '#' respectively,
@@ -560,9 +560,9 @@ public class ClassInfo {
         String fieldName = fieldDefClassInfo.fieldNames[fieldNo];
         String fieldSig = fieldDefClassInfo.fieldSignatures[fieldNo];
         for (int i = 0; i < cpoolRefsToFieldNames.length; i++) {
-            if (fieldName == cpoolRefsToFieldNames[i] &&
-                    fieldSig == cpoolRefsToFieldSignatures[i]) {
-                if (fieldDefClassName == cpoolRefsToFieldClasses[i]) {
+            if (fieldName.equals(cpoolRefsToFieldNames[i]) &&
+                    fieldSig.equals(cpoolRefsToFieldSignatures[i]) ) {
+                if (fieldDefClassName.equals(cpoolRefsToFieldClasses[i]) ) {
                     return true;  // "real" reference
                 } else {  // Check if this is a "fake" reference that resolves to the above "real" reference
                     ClassInfo classInThisCpool =
@@ -613,9 +613,9 @@ public class ClassInfo {
         String methodName = methodDefClassInfo.methodNames[methodNo];
         String methodSig = methodDefClassInfo.methodSignatures[methodNo];
         for (int i = 0; i < cpoolRefsToMethodNames.length; i++) {
-            if (methodName == cpoolRefsToMethodNames[i] &&
-                    methodSig == cpoolRefsToMethodSignatures[i]) {
-                if (methodDefClassName == cpoolRefsToMethodClasses[i]) {
+            if (methodName.equals(cpoolRefsToMethodNames[i]) &&
+                    methodSig.equals(cpoolRefsToMethodSignatures[i])) {
+                if (methodDefClassName.equals(cpoolRefsToMethodClasses[i])) {
                     return true;  // "real" reference
                 } else {  // Check if this is a "fake" reference that resolves to the above "real" reference
                     // Be careful - class in the cpool may be not a project class (e.g. a core class).
@@ -671,7 +671,7 @@ public class ClassInfo {
             }
             String[] exc = checkedExceptions[i];
             for (int j = 0; j < exc.length; j++) {
-                if (exc[j] == excName) {
+                if (exc[j].equals(excName)) {
                     return i;
                 }
             }

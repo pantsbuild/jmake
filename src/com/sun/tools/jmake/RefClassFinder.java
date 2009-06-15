@@ -137,7 +137,7 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (packageName == clientInfo.packageName ||
+            if (packageName.equals(clientInfo.packageName) ||
                     clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
                 continue;
             }
@@ -162,7 +162,7 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (topLevelEnclosingClass == clientInfo.topLevelEnclosingClass) {
+            if (topLevelEnclosingClass.equals(clientInfo.topLevelEnclosingClass)) {
                 continue;
             }
             if (clientInfo.referencesClass(classInfo.name, classInfo.isInterface(), 1)) {
@@ -189,11 +189,11 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (clientInfo.packageName != packageName &&
+            if ((!clientInfo.packageName.equals(packageName)) &&
                     !clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
                 continue;
             }
-            if (clientInfo.topLevelEnclosingClass == topLevelEnclosingClass) {
+            if (clientInfo.topLevelEnclosingClass.equals(topLevelEnclosingClass)) {
                 continue;
             }
             if (clientInfo.referencesClass(classInfo.name, classInfo.isInterface(), 1)) {
@@ -218,10 +218,10 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (clientInfo.packageName != packageName) {
+            if (!clientInfo.packageName.equals(packageName)) {
                 continue;
             }
-            if (topLevelEnclosingClass == clientInfo.topLevelEnclosingClass) {
+            if (topLevelEnclosingClass.equals(clientInfo.topLevelEnclosingClass)) {
                 continue;
             }
             if (clientInfo.referencesClass(classInfo.name, classInfo.isInterface(), 1)) {
@@ -244,7 +244,7 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (clientInfo.packageName == packageName) {
+            if (clientInfo.packageName.equals(packageName)) {
                 continue;
             }
             if (clientInfo.referencesClass(classInfo.name, classInfo.isInterface(), 1)) {
@@ -269,7 +269,7 @@ public class RefClassFinder {
             if (clientInfo == null) {
                 continue;  // New class
             }
-            if (clientInfo.packageName == packageName) {
+            if (clientInfo.packageName.equals(packageName)) {
                 continue;
             }
             if (!clientInfo.isSubclassOf(directlyEnclosingClass, false)) {
@@ -375,7 +375,8 @@ public class RefClassFinder {
                     void handleMethod(ClassInfo classInfo, int otherMethodIdx) {
                         String otherMSig =
                                 classInfo.methodSignatures[otherMethodIdx];
-                        if (mSig != otherMSig && Utils.sameParamNumber(mSig, otherMSig)) {
+                        if ( (!mSig.equals(otherMSig)) &&
+                                Utils.sameParamNumber(mSig, otherMSig)) {
                             findReferencingClassesForMethod(classInfo, otherMethodIdx);
                         }
                     }
@@ -536,7 +537,7 @@ public class RefClassFinder {
         String res = pcdm.classAlreadyRecompiledOrUncompileable(className);
         if (res == null) {
             affectedClassNames.add(className);
-        } else if (res != "") {  // The dependent class comes from a .jar.
+        } else if (!"".equals(res)) {  // The dependent class comes from a .jar.
             if (checkedClassIsFromJar || noWarnOnDependentJar) {
                 return;
             }
@@ -613,7 +614,8 @@ public class RefClassFinder {
             if (!memberAccessibleFrom(declaringClassInfo, memberNo, clientInfo, isField)) {
                 continue;
             }
-            if (fromDiffPackages && declaringClassPackage == clientInfo.packageName) {
+            if (fromDiffPackages && 
+                    declaringClassPackage.equals(clientInfo.packageName)) {
                 continue;
             }
             if (onlySubclasses && !clientInfo.isSubclassOf(declaringClassName, false)) {
@@ -641,16 +643,16 @@ public class RefClassFinder {
         if (Modifier.isPublic(classFlags)) {
             return true;
         } else if (Modifier.isProtected(classFlags)) {
-            if (classPackage == clientClassPackage ||
+            if (classPackage.equals(clientClassPackage) ||
                     clientClassInfo.isSubclassOf(classInfo.directlyEnclosingClass, false)) {
                 return true;
             }
         } else if (Modifier.isPrivate(classFlags)) {
-            if (classInfo.topLevelEnclosingClass == clientClassInfo.topLevelEnclosingClass) {
+            if (classInfo.topLevelEnclosingClass.equals(clientClassInfo.topLevelEnclosingClass)) {
                 return true;
             }
         } else {
-            if (classPackage == clientClassPackage) {
+            if (classPackage.equals(clientClassPackage)) {
                 return true;
             }
         }
@@ -674,19 +676,19 @@ public class RefClassFinder {
             if (Modifier.isPublic(memberFlags)) {
                 return true;
             } else if (Modifier.isProtected(memberFlags) &&
-                    (memberClassPackage == clientClassPackage ||
+                    (memberClassPackage.equals(clientClassPackage) ||
                     clientClassInfo.isSubclassOf(memberClassInfo.name, false))) {
                 return true;
             } else if (Modifier.isPrivate(memberFlags)) {
-                if (memberClassInfo.topLevelEnclosingClass ==
-                        clientClassInfo.topLevelEnclosingClass) {
+                if (memberClassInfo.topLevelEnclosingClass.equals(
+                        clientClassInfo.topLevelEnclosingClass)) {
                     return true;
                 }
-            } else if (memberClassPackage == clientClassPackage) {
+            } else if (memberClassPackage.equals(clientClassPackage)) {
                 return true;
             }
         } else if (Modifier.isProtected(memberClassFlags)) {
-            if (!(memberClassPackage == clientClassPackage ||
+            if (!(memberClassPackage.equals(clientClassPackage) ||
                     clientClassInfo.isSubclassOf(memberClassInfo.directlyEnclosingClass, false))) {
                 return true;
             }
@@ -694,28 +696,29 @@ public class RefClassFinder {
                     Modifier.isProtected(memberFlags)) {
                 return true;
             } else if (Modifier.isPrivate(memberFlags)) {
-                if (memberClassInfo.topLevelEnclosingClass ==
-                        clientClassInfo.topLevelEnclosingClass) {
+                if (memberClassInfo.topLevelEnclosingClass.equals(
+                        clientClassInfo.topLevelEnclosingClass)) {
                     return true;
                 }
             } else {
-                if (memberClassPackage == clientClassPackage) {
+                if (memberClassPackage.equals(clientClassPackage)) {
                     return true;
                 }
             }
         } else if (Modifier.isPrivate(memberClassFlags)) {
-            if (memberClassInfo.topLevelEnclosingClass ==
-                    clientClassInfo.topLevelEnclosingClass) {
+            if (memberClassInfo.topLevelEnclosingClass.equals(
+                    clientClassInfo.topLevelEnclosingClass)) {
                 return true;
             }
         } else {  // memberClassInfo is package-private
-            if (memberClassPackage != clientClassPackage) {
+            if (!memberClassPackage.equals(clientClassPackage)) {
                 return false;
             }
             if (Modifier.isPublic(memberFlags) || Modifier.isProtected(memberFlags)) {
                 return true;
             } else if (Modifier.isPrivate(memberFlags)) {
-                if (memberClassInfo.topLevelEnclosingClass == clientClassInfo.topLevelEnclosingClass) {
+                if (memberClassInfo.topLevelEnclosingClass.equals(
+                        clientClassInfo.topLevelEnclosingClass)) {
                     return true;
                 }
             } else {

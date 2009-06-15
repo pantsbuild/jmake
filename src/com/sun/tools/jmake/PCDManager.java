@@ -543,7 +543,7 @@ public class PCDManager {
             for (Iterator<String> iter = updatedAndCheckedClasses.iterator(); iter.hasNext();) {
                 PCDEntry entry = pcd.get(iter.next());
                 if (entry.checkResult == PCDEntry.CV_DELETED &&
-                        entry.oldClassInfo.directlyEnclosingClass != "") {
+                        !"".equals(entry.oldClassInfo.directlyEnclosingClass)) {
                     PCDEntry enclEntry =
                             pcd.get(entry.oldClassInfo.directlyEnclosingClass);
                     enclEntry.checkResult = PCDEntry.CV_INCOMPATIBLE;
@@ -878,7 +878,7 @@ public class PCDManager {
         ClassInfo classInfo =
                 new ClassInfo(classFileBytes, ClassInfo.VER_NEW, this, classFileFullPath);
         if (enclosingClassPCDE != null) {
-            if (classInfo.directlyEnclosingClass != enclosingClassPCDE.newClassInfo.name) {
+            if (!classInfo.directlyEnclosingClass.equals(enclosingClassPCDE.newClassInfo.name)) {
                 // Check if the above strings are like A and A$1. If so, there is actually no problem - the correct
                 // answer is A$1. The reason why just A was determined as a directly enclosing class when parsing
                 // class classInfo is due to the ambiguous interpretation of names like A$1$B. Such a name may mean
@@ -1053,7 +1053,7 @@ public class PCDManager {
                         boolean found = false;
                         String oldNestedClass = oldClassInfo.nestedClasses[j];
                         for (int k = 0; k < newClassInfo.nestedClasses.length; k++) {
-                            if (oldNestedClass == newClassInfo.nestedClasses[k]) {
+                            if (oldNestedClass.equals(newClassInfo.nestedClasses[k])) {
                                 found = true;
                                 break;
                             }
@@ -1135,7 +1135,7 @@ public class PCDManager {
             String className = iter.next();
             PCDEntry pcde = pcd.get(className);
             getClassInfoForPCDEntry(ClassInfo.VER_NEW, pcde);
-            if (pcde.oldClassInfo.directlyEnclosingClass != "") {
+            if (!"".equals(pcde.oldClassInfo.directlyEnclosingClass)) {
                 // The following problem can occur with nested classes. A C.java source has been changed, so that C.class is
                 // not changed or changed in a compatible way, whereas the access modifiers of C$X.class are changed in an
                 // incompatible way, so that something is broken in the project. When jmake is called for the first time,
@@ -1157,7 +1157,7 @@ public class PCDManager {
                 //}
                 if (enclosingClassInfo.nestedClasses != null) {  // Can be that this nested class was the only one for enclosing class, and it's deleted now
                     for (int i = 0; i < enclosingClassInfo.nestedClasses.length; i++) {
-                        if (className == enclosingClassInfo.nestedClasses[i]) {
+                        if (className.equals(enclosingClassInfo.nestedClasses[i])) {
                             pcde.newClassInfo.accessFlags =
                                     enclosingClassInfo.nestedClassAccessFlags[i];
                             pcde.newClassInfo.isNonMemberNestedClass =

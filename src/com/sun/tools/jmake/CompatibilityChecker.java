@@ -22,7 +22,8 @@ public class CompatibilityChecker {
 
     private PCDManager pcdm;
     private RefClassFinder rf;
-    ClassInfo oldClassInfo, newClassInfo;
+    ClassInfo oldClassInfo = null;
+    ClassInfo newClassInfo = null;
     private boolean versionsCompatible;
     private boolean publicConstantChanged;
 
@@ -230,7 +231,8 @@ public class CompatibilityChecker {
             endIdx = nFLen - 1;
             k = i < nFLen ? i : endIdx;
             for (j = 0; j < nFLen; j++) {
-                if (oFName == nFNames[k] && oFSig == nFSignatures[k]) {
+                if (oFName.equals(nFNames[k]) &&
+                        oFSig.equals(nFSignatures[k])) {
                     found = true;
                     break;
                 }
@@ -273,7 +275,7 @@ public class CompatibilityChecker {
 
                 boolean found = false;
                 for (j = 0; j < oFLen; j++) {
-                    if (nFName == oFNames[j]) {
+                    if (nFName.equals(oFNames[j])) {
                         found = true;
                         break;
                     }
@@ -434,7 +436,7 @@ public class CompatibilityChecker {
                             String newEx = newExceptions[ei];
                             found = false;
                             for (int ej = 0; ej < oldExceptions.length; ej++) {
-                                if (newEx == oldExceptions[ej]) {
+                                if (newEx.equals(oldExceptions[ej])) {
                                     found = true;
                                     break;
                                 }
@@ -470,7 +472,8 @@ public class CompatibilityChecker {
 
                     boolean found = false;
                     for (j = 0; j < oMLen; j++) {
-                        if (newMName == oMNames[j] && newMSig == oMSignatures[j]) {
+                        if (newMName.equals(oMNames[j]) &&
+                                newMSig.equals(oMSignatures[j])) {
                             found = true;
                             break;
                         }
@@ -482,12 +485,14 @@ public class CompatibilityChecker {
                     // Check if the new method overloads an existing (declared or inherited) method. Overloading test is rough -
                     // we just check if the number of parameters is the same. Note that if a new constructor has been added, it
                     // can be treated in the same way, except that we shouldn't look up "same name methods" for it in superclasses.
-                    oldClassInfo.findExistingSameNameMethods(newMName, newMName != "<init>", false, new ClassInfo.MethodHandler() {
+                    oldClassInfo.findExistingSameNameMethods(newMName, 
+                            !newMName.equals("<init>"), false,
+                            new ClassInfo.MethodHandler() {
 
                         void handleMethod(ClassInfo classInfo, int methodIdx) {
                             String otherMSig =
                                     classInfo.methodSignatures[methodIdx];
-                            if ((newMSig == otherMSig && isStatic &&
+                            if ((newMSig.equals(otherMSig) && isStatic &&
                                     classInfo != oldClassInfo) ||
                                     (newMSig != otherMSig &&
                                     Utils.sameParamNumber(newMSig, otherMSig))) {

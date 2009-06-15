@@ -17,11 +17,11 @@ import java.util.Enumeration;
  */
 public class ProjectDatabaseWriter extends BinaryFileWriter {
 
-    private Hashtable pcd;
+    private Hashtable pcd = null;
     private int nOfEntries;
     private byte[] stringBuf;
     private int curStringBufPos,  stringBufInc,  curStringBufWatermark,  stringCount;
-    private StringHashTable stringHashTable;
+    private StringHashTable stringHashTable = null;
 
     public byte[] writeProjectDatabase(Hashtable pcd) {
         this.pcd = pcd;
