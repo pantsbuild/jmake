@@ -9,6 +9,7 @@ package com.sun.tools.jmake;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class MainTest {
 
@@ -24,10 +25,19 @@ public class MainTest {
     }
 
     @Test
-    public void testMain() {
-        System.out.println("main");
-        String[] args = { "-help" };
+    public void testVersion() {
+        System.out.println("jmake -version");
+        String[] args = {"-version"};
         Main.main(args);
+        assertEquals(true, true);
+    }
+
+    @Test
+    public void testHelp() {
+        System.out.println("jmake -help");
+        String[] args = {"-help"};
+        Main.main(args);
+        assertEquals(true, true);
     }
 
 }
