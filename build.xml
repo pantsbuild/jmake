@@ -77,11 +77,13 @@
     <target name="findbugs-xml" depends="jar">
         <mkdir dir="${build.dir}"/>
         <exec executable="findbugs"> <arg value="-version"/> </exec>
-        <echo message="findbugs -maxHeap 512 -textui -effort:default -low -xml:withMessages -output ${build.dir}/findbugs.xml  ${dist.jar}"/>
+        <echo message="findbugs -maxHeap 512 -textui -auxclasspath ${run.classpath} -effort:default -low -xml:withMessages -output ${build.dir}/findbugs.xml  ${dist.jar}"/>
         <exec executable="findbugs" vmlauncher="false">
             <arg value="-maxHeap"/>
             <arg value="512"/>
             <arg value="-textui"/>
+            <arg value="-auxclasspath"/>
+            <arg value="${run.classpath}"/>
             <arg value="-effort:default"/>
             <arg value="-low"/>
             <arg value="-xml:withMessages"/>
