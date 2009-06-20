@@ -72,9 +72,10 @@
 
     -->
 
-    <target name="test-report" depends="findbugs-xml,pmd-xml,junitreport-xml"/>
+    <target name="test-report" depends="jar,findbugs-xml,pmd-xml,junitreport-xml"/>
 
-    <target name="findbugs-xml">
+    <target name="findbugs-xml" depends="jar">
+        <mkdir dir="${build.dir}"/>
         <exec executable="findbugs"> <arg value="-version"/> </exec>
         <echo message="findbugs -maxHeap 512 -textui -effort:default -low -xml:withMessages -output ${build.dir}/findbugs.xml  ${dist.jar}"/>
         <exec executable="findbugs" vmlauncher="false">
@@ -90,7 +91,8 @@
         </exec>
     </target>
 
-    <target name="pmd-xml">
+    <target name="pmd-xml" depends="jar">
+        <mkdir dir="${build.dir}"/>
         <echo message="pmd.sh ${src.dir} xml basic,imports,unusedcode"/>
         <exec executable="pmd.sh" vmlauncher="false"
             output="${build.dir}/pmd.xml">
@@ -101,12 +103,18 @@
     </target>
 
     <target name="junitreport-xml">
+        <mkdir dir="${build.test.results.dir}/html"/>
         <junitreport todir="${build.test.results.dir}">
             <fileset dir="${build.test.results.dir}">
                 <include name="TEST-*.xml"/>
             </fileset>
             <report todir="${build.test.results.dir}/html"/>
         </junitreport>
+    </target>
+
+    <target name="-post-clean">
+        <delete file="${build.dir}"/>
+        <delete file="${dist.dir}"/>
     </target>
 
 </project>
