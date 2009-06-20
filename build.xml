@@ -71,4 +71,52 @@
     nbproject/build-impl.xml file. 
 
     -->
+
+    <target name="test-report" depends="jar,findbugs-xml,pmd-xml,junitreport-xml"/>
+
+    <target name="findbugs-xml" depends="jar">
+        <mkdir dir="${build.dir}"/>
+        <exec executable="findbugs"> <arg value="-version"/> </exec>
+        <echo message="findbugs -maxHeap 512 -textui -auxclasspath ${run.classpath} -effort:default -low -xml:withMessages -output ${build.dir}/findbugs.xml  ${dist.jar}"/>
+        <exec executable="findbugs" vmlauncher="false">
+            <arg value="-maxHeap"/>
+            <arg value="512"/>
+            <arg value="-textui"/>
+            <arg value="-auxclasspath"/>
+            <arg value="${run.classpath}"/>
+            <arg value="-effort:default"/>
+            <arg value="-low"/>
+            <arg value="-xml:withMessages"/>
+            <arg value="-output"/>
+            <arg value="${build.dir}/findbugs.xml"/>
+            <arg path="${dist.jar}"/>
+        </exec>
+    </target>
+
+    <target name="pmd-xml" depends="jar">
+        <mkdir dir="${build.dir}"/>
+        <echo message="pmd.sh ${src.dir} xml basic,imports,unusedcode"/>
+        <exec executable="pmd.sh" vmlauncher="false"
+            output="${build.dir}/pmd.xml">
+            <arg value="${src.dir}"/>
+            <arg value="xml"/>
+            <arg value="basic,imports,unusedcode"/>
+        </exec>
+    </target>
+
+    <target name="junitreport-xml">
+        <mkdir dir="${build.test.results.dir}/html"/>
+        <junitreport todir="${build.test.results.dir}">
+            <fileset dir="${build.test.results.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report todir="${build.test.results.dir}/html"/>
+        </junitreport>
+    </target>
+
+    <target name="-post-clean">
+        <delete file="${build.dir}"/>
+        <delete file="${dist.dir}"/>
+    </target>
+
 </project>
