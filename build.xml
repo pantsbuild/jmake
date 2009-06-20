@@ -101,11 +101,11 @@
     </target>
 
     <target name="junitreport-xml">
-        <junitreport todir="${run.test.dir}">
+        <junitreport todir="${build.test.results.dir}">
             <fileset dir="${build.test.results.dir}">
                 <include name="TEST-*.xml"/>
             </fileset>
-            <report todir="${run.test.dir}/html"/>
+            <report todir="${build.test.results.dir}/html"/>
         </junitreport>
     </target>
 
