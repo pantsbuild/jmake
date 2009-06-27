@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+  Template ant script, replace @NAME@ with name of item to import.
+
+  Properties expected to be defined:
+    import.dir
+    bundle.dir
+    @NAME@.bundle
+    @NAME@.file.reference
+    @NAME@.bundle.type
+
+  Targets defined:
+    -get-init-@NAME@
+    -get-bundle-@NAME@
+    -get-unbundle-@NAME@-zip
+    -get-unbundle-@NAME@-targz
+    import-@NAME@
+
+  Properties defined:
+    import.@NAME@.bundle.exists
+        import.@NAME@.bundle.exists
+    import.@NAME@.bundle.exists
+
+  -->
+
+<project name="import-@NAME@" default="import-@NAME@" basedir=".">
+
+    <target name="-get-init-@NAME@">
+        <condition property="import.@NAME@.bundle.exists">
+            <available file="${bundle.dir}/${@NAME@.bundle}" type="file"/>
+        </condition>
+        <condition property="import.@NAME@.file.exists">
+            <available file="${@NAME@.file.reference}" type="file"/>
+        </condition>
+    </target>
+
+    <target name="-get-bundle-@NAME@" depends="-get-init-@NAME@" unless="import.@NAME@.bundle.exists">
+        <get-bundle name="@NAME@" url="${@NAME@.url}" bundle="${@NAME@.bundle}"/>
+        <file-check file="${bundle.dir}/${@NAME@.bundle}"/>
+    </target>
+
+    <target name="-get-unbundle-@NAME@-zip" depends="-get-bundle-@NAME@" unless="import.@NAME@.file.exists">
+        <unbundle-zip src="${bundle.dir}/${@NAME@.bundle}" dest="${import.dir}/@NAME@"/>
+        <file-check file="${@NAME@.file.reference}"/>
+    </target>
+
+    <target name="-get-unbundle-@NAME@-targz" depends="-get-bundle-@NAME@" unless="import.@NAME@.file.exists">
+        <unbundle-targz src="${bundle.dir}/${@NAME@.bundle}" dest="${import.dir}/@NAME@"/>
+        <file-check file="${@NAME@.file.reference}"/>
+    </target>
+
+    <target name="import-@NAME@" depends="-get-bundle-@NAME@" unless="import.@NAME@.file.exists">
+        <antcall target="-get-unbundle-@NAME@-${@NAME@.bundle.type}"/>
+        <file-check file="${@NAME@.file.reference}"/>
+    </target>
+
+</project>

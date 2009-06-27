@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="import-defs" default="import">
+
+    <macrodef name="get-bundle">
+        <attribute name="name"/>
+        <attribute name="url"/>
+        <attribute name="bundle"/>
+        <sequential>
+            <mkdir dir="${bundle.dir}"/>
+            <delete file="${bundle.dir}/@{bundle}"/>
+            <get src="@{url}@{bundle}" dest="${bundle.dir}/@{bundle}"/>
+            <delete dir="${import.dir}/@{name}"/>
+            <mkdir dir="${import.dir}/@{name}"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="unbundle-zip">
+        <attribute name="src"/>
+        <attribute name="dest"/>
+        <sequential>
+            <unzip src="@{src}" dest="@{dest}"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="unbundle-targz">
+        <attribute name="src"/>
+        <attribute name="dest"/>
+        <sequential>
+            <untar src="@{src}" dest="@{dest}" compression="gzip"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="file-check">
+        <attribute name="file"/>
+        <sequential>
+            <fail message="No @{file}">
+                <condition>
+                    <not>
+                        <available file="@{file}" type="file"/>
+                    </not>
+                </condition>
+            </fail>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="do-import-setup">
+        <attribute name="name"/>
+        <sequential>
+            <mkdir dir="${build.dir}/xml_generated"/>
+            <copy file="import-target-template.xml"
+                  tofile="${build.dir}/xml_generated/import-@{name}.xml"/>
+            <replace file="${build.dir}/xml_generated/import-@{name}.xml"
+                     token="@NAME@" value="@{name}"/>
+            <import file="${build.dir}/xml_generated/import-@{name}.xml"/>
+        </sequential>
+    </macrodef>        
+   
+    <do-import-setup name="junit"/>
+
+    <do-import-setup name="findbugs"/>
+
+    <do-import-setup name="pmd"/>
+
+    <target name="import" depends="import-junit, import-findbugs, import-pmd"
+            description="Import all items needed">
+    </target>
+
+</project>

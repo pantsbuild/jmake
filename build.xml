@@ -9,7 +9,11 @@
 <!-- in the project's Project Properties dialog box.-->
 <project name="jmake" default="default" basedir=".">
     <description>Builds, tests, and runs the project jmake.</description>
+    <property file="import.properties"/>
+    <property file="nbproject/project.properties"/>
+    <import file="import-defs.xml"/>
     <import file="nbproject/build-impl.xml"/>
+
     <!--
 
     There exist several targets which are by default empty and which can be 
@@ -72,11 +76,15 @@
 
     -->
 
-    <target name="test-report" depends="jar,findbugs-xml,pmd-xml,junitreport-xml"/>
+    <target name="-pre-init" depends="import"/>
 
-    <target name="findbugs-xml" depends="jar">
+    <target name="test-report" depends="jar, junitreport-xml, findbugs-xml, pmd-xml"/>
+
+    <target name="findbugs-xml" depends="jar, import-findbugs">
         <mkdir dir="${build.dir}"/>
-        <exec executable="findbugs"> <arg value="-version"/> </exec>
+        <exec executable="findbugs">
+            <arg value="-version"/>
+        </exec>
         <echo message="findbugs -maxHeap 512 -textui -auxclasspath ${run.classpath} -effort:default -low -xml:withMessages -output ${build.dir}/findbugs.xml  ${dist.jar}"/>
         <exec executable="findbugs" vmlauncher="false">
             <arg value="-maxHeap"/>
@@ -93,7 +101,7 @@
         </exec>
     </target>
 
-    <target name="pmd-xml" depends="jar">
+    <target name="pmd-xml" depends="jar, import-pmd">
         <mkdir dir="${build.dir}"/>
         <echo message="pmd.sh ${src.dir} xml basic,imports,unusedcode"/>
         <exec executable="pmd.sh" vmlauncher="false"
@@ -104,7 +112,7 @@
         </exec>
     </target>
 
-    <target name="junitreport-xml">
+    <target name="junitreport-xml" depends="import-junit">
         <mkdir dir="${build.test.results.dir}/html"/>
         <junitreport todir="${build.test.results.dir}">
             <fileset dir="${build.test.results.dir}">
@@ -117,6 +125,9 @@
     <target name="-post-clean">
         <delete file="${build.dir}"/>
         <delete file="${dist.dir}"/>
+    </target>
+
+    <target name="default" depends="import, init, jar, test, javadoc">
     </target>
 
 </project>
