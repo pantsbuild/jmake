@@ -602,6 +602,19 @@ public class PCDManager {
             if (entry.javaFileFullPath.endsWith(".java")) {
                 initializeClassFileFullPath(entry);
                 if (projectSpecifiedAsAllSources) {
+                    if (ClassPath.getVirtualPath() != null) {
+                        String paths[] = ClassPath.getVirtualPath().split(File.pathSeparator);
+                        String tmpClassName = entry.className;
+                        tmpClassName = tmpClassName.replaceAll("\\Q$\\E.*$", "");
+                        for (int i=0; i<paths.length; i++) {
+                            String tmpFilename = paths[i] + File.separator + tmpClassName + ".java";
+                            File tmpFile = new File(tmpFilename);
+                            if (tmpFile.exists()) {
+                                entry.javaFileFullPath = tmpFile.getAbsolutePath();
+                                break;
+                            }
+                        }
+                    }
                     Utils.startTiming(Utils.TIMING_CLASS_FILE_OBSOLETE_TMP);
                     if (classFileObsoleteOrDeleted(entry)) {
                         updatedJavaFiles.add(entry.javaFileFullPath);
