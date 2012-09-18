@@ -19,7 +19,7 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-/** 
+/**
  * The main class of the <b>jmake</b> tool.<p>
  *
  * Has several entrypoints: <code>main</code>, <code>mainExternal</code>, <code>mainProgrammatic</code>,
@@ -27,14 +27,14 @@ import java.util.List;
  * The first is not intended to be used by applications other than <b>jmake</b> itself, whereas the
  * rest can be used to call <b>jmake</b> externally with various degrees of control over its behaviour.
  * See method comments for more details.
- * 
+ *
  * @author Misha Dmitriev
  * @date 12 October 2004
  */
 public class Main {
 
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
-    static final String VERSION = "1.3.7";
+    static final String VERSION = "1.3.7-2";
     private String pdbFileName = null;
     private List<String> allProjectJavaFileNamesList =
             new ArrayList<String>(100);
