@@ -28,7 +28,7 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
         nOfEntries = pcd.size();
 
         // So far the constant here is chosen rather arbitrarily
-        initBuf(nOfEntries * 10000);
+        initBuf(nOfEntries * 1000);
 
         stringBuf = new byte[nOfEntries * 300];
         stringBufInc = stringBuf.length / 5;
@@ -94,7 +94,8 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
             }
             boolean isRefClassArray[] = ci.isRefClassArray;
             for (i = 0; i < len; i++) {
-                buf[curBufPos++] = (isRefClassArray[i] ? (byte) 1 : (byte) 0);
+                byte b = isRefClassArray[i] ? (byte) 1 : (byte) 0;
+                writeByte(b);
             }
         }
 
@@ -136,7 +137,8 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
         }
 
         writeChar(ci.accessFlags);
-        buf[curBufPos++] = ci.isNonMemberNestedClass ? (byte) 1 : (byte) 0;
+        byte b = ci.isNonMemberNestedClass ? (byte) 1 : (byte) 0;
+        writeByte(b);
         if (!"java/lang/Object".equals(ci.name)) {
             writeStringRef(ci.superName);
         }
@@ -177,23 +179,23 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
                 Object pc = primitiveConstantInitValues[i];
                 if (pc != null) {
                     if (pc instanceof String) {
-                        buf[curBufPos++] = 1;
+                        writeByte((byte)1);
                         writeStringRef((String) pc);
                     } else if (pc instanceof Integer) {
-                        buf[curBufPos++] = 2;
+                        writeByte((byte)2);
                         writeInt(((Integer) pc).intValue());
                     } else if (pc instanceof Long) {
-                        buf[curBufPos++] = 3;
+                        writeByte((byte)3);
                         writeLong(((Long) pc).longValue());
                     } else if (pc instanceof Float) {
-                        buf[curBufPos++] = 4;
+                        writeByte((byte)4);
                         writeFloat(((Float) pc).floatValue());
                     } else if (pc instanceof Double) {
-                        buf[curBufPos++] = 5;
+                        writeByte((byte)5);
                         writeDouble(((Double) pc).doubleValue());
                     }
                 } else {
-                    buf[curBufPos++] = 0;
+                    writeByte((byte)0);
                 }
             }
         }

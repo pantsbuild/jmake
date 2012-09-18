@@ -47,6 +47,14 @@ public class BinaryFileWriter {
         return buf;
     }
 
+
+    protected void writeByte(byte b) {
+        if (curBufPos > threshold) {
+            increaseBuf();
+        }
+        buf[curBufPos++] = b;
+    }
+
     protected void writeChar(int ch) {
         buf[curBufPos++] = (byte) ((ch >> 8) & 255);
         buf[curBufPos++] = (byte) (ch & 255);
