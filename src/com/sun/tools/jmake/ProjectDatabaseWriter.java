@@ -28,7 +28,7 @@ public class ProjectDatabaseWriter extends BinaryFileWriter {
         nOfEntries = pcd.size();
 
         // So far the constant here is chosen rather arbitrarily
-        initBuf(nOfEntries * 1000);
+        initBuf(nOfEntries * 10000);
 
         stringBuf = new byte[nOfEntries * 300];
         stringBufInc = stringBuf.length / 5;
