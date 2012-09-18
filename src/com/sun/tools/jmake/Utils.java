@@ -6,15 +6,14 @@
  */
 package com.sun.tools.jmake;
 
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-
-import java.io.PrintStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileInputStream;
+import java.io.PrintStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Utility functions used by other classes from this package.
@@ -34,6 +33,7 @@ public class Utils {
     static final int JAVAC_TARGET_RELEASE_OLDEST = 0x01040000;  // 1.4 and previous versions
     static final int JAVAC_TARGET_RELEASE_15 = 0x01050000;  // if class is compiled with -target 1.5
     static final int JAVAC_TARGET_RELEASE_16 = 0x01060000;  // if class is compiled with -target 1.6
+    static final int JAVAC_TARGET_RELEASE_17 = 0x01070000;  // if class is compiled with -target 1.7
     static int warningLimit = 20;  // Maximum number of warnings to print
     static final int TIMING_TOTAL = 0;
     static final int TIMING_PDBREAD = 1;

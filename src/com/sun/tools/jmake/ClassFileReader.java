@@ -26,6 +26,7 @@ public class ClassFileReader extends BinaryFileReader {
     public static final int JDK14_MAJOR_VERSION = 48;
     public static final int JDK15_MAJOR_VERSION = 49;
     public static final int JDK16_MAJOR_VERSION = 50;
+    public static final int JDK17_MAJOR_VERSION = 51;
     public static final int CONSTANT_Utf8 = 1;
     public static final int CONSTANT_Unicode = 2;
     public static final int CONSTANT_Integer = 3;
@@ -71,7 +72,9 @@ public class ClassFileReader extends BinaryFileReader {
         if (majorVersion > JDK14_MAJOR_VERSION ||
                 versionWord(majorVersion, minorVersion) <
                 versionWord(JAVA_MIN_MAJOR_VERSION, JAVA_MIN_MINOR_VERSION) ) {
-            if (majorVersion == JDK16_MAJOR_VERSION) {
+            if (majorVersion == JDK17_MAJOR_VERSION) {
+                classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_17;
+            } else if (majorVersion == JDK16_MAJOR_VERSION) {
                 classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_16;
             } else if (majorVersion == JDK15_MAJOR_VERSION) {
                 classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_15;
