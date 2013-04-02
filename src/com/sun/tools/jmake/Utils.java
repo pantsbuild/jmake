@@ -34,6 +34,7 @@ public class Utils {
     static final int JAVAC_TARGET_RELEASE_15 = 0x01050000;  // if class is compiled with -target 1.5
     static final int JAVAC_TARGET_RELEASE_16 = 0x01060000;  // if class is compiled with -target 1.6
     static final int JAVAC_TARGET_RELEASE_17 = 0x01070000;  // if class is compiled with -target 1.7
+    static final int JAVAC_TARGET_RELEASE_18 = 0x01080000;  // if class is compiled with -target 1.8
     static int warningLimit = 20;  // Maximum number of warnings to print
     static final int TIMING_TOTAL = 0;
     static final int TIMING_PDBREAD = 1;

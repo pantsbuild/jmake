@@ -27,6 +27,7 @@ public class ClassFileReader extends BinaryFileReader {
     public static final int JDK15_MAJOR_VERSION = 49;
     public static final int JDK16_MAJOR_VERSION = 50;
     public static final int JDK17_MAJOR_VERSION = 51;
+    public static final int JDK18_MAJOR_VERSION = 52;
     public static final int CONSTANT_Utf8 = 1;
     public static final int CONSTANT_Unicode = 2;
     public static final int CONSTANT_Integer = 3;
@@ -39,6 +40,9 @@ public class ClassFileReader extends BinaryFileReader {
     public static final int CONSTANT_Methodref = 10;
     public static final int CONSTANT_InterfaceMethodref = 11;
     public static final int CONSTANT_NameandType = 12;
+    public static final int CONSTANT_MethodHandle = 15;
+    public static final int CONSTANT_MethodType = 16;
+    public static final int CONSTANT_InvokeDynamic = 18;
     private ClassInfo classInfo = null;
     private int cpOffsets[];
     private Object cpObjectCache[];
@@ -72,7 +76,9 @@ public class ClassFileReader extends BinaryFileReader {
         if (majorVersion > JDK14_MAJOR_VERSION ||
                 versionWord(majorVersion, minorVersion) <
                 versionWord(JAVA_MIN_MAJOR_VERSION, JAVA_MIN_MINOR_VERSION) ) {
-            if (majorVersion == JDK17_MAJOR_VERSION) {
+            if (majorVersion == JDK18_MAJOR_VERSION) {
+                classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_18;
+            } else if (majorVersion == JDK17_MAJOR_VERSION) {
                 classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_17;
             } else if (majorVersion == JDK16_MAJOR_VERSION) {
                 classInfo.javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_16;
@@ -112,6 +118,7 @@ public class ClassFileReader extends BinaryFileReader {
                     break;
 
                 case CONSTANT_String:
+                case CONSTANT_MethodType:
                     curBufPos += 2;
                     break;
 
@@ -126,9 +133,14 @@ public class ClassFileReader extends BinaryFileReader {
                     curBufPos += 4;
                     break;
 
+                case CONSTANT_MethodHandle:
+                    curBufPos += 3;
+                    break;
+
                 case CONSTANT_NameandType:
                 case CONSTANT_Integer:
                 case CONSTANT_Float:
+                case CONSTANT_InvokeDynamic:
                     curBufPos += 4;
                     break;
 
