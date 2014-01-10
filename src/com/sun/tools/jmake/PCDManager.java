@@ -17,7 +17,6 @@ import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -65,6 +64,7 @@ public class PCDManager {
     private ClassFileReader cfr;
     private boolean newProject = false;
     private static boolean backSlashFileSeparator = File.separatorChar != '/';
+    private boolean pdbTextFormat = false;
 
     /**** Interface to the class ****/
     /**
@@ -74,11 +74,14 @@ public class PCDManager {
      * either one or another of the above argument groups, but never both.
      */
     public PCDManager(PCDContainer pcdc,
-            String projectJavaAndJarFilesArray[],
-            String addedJavaAndJarFilesArray[], String removedJavaAndJarFilesArray[], String updatedJavaAndJarFilesArray[],
-            String in_destDir,
-            List<String> javacAddArgs,
-            boolean failOnDependentJar, boolean noWarnOnDependentJar) {
+                      String projectJavaAndJarFilesArray[],
+                      String addedJavaAndJarFilesArray[],
+                      String removedJavaAndJarFilesArray[],
+                      String updatedJavaAndJarFilesArray[],
+                      String in_destDir,
+                      List<String> javacAddArgs,
+                      boolean failOnDependentJar,
+                      boolean noWarnOnDependentJar) {
         this.pcdc = pcdc;
         if (pcdc.pcd == null) {
             pcd = new Hashtable<String,PCDEntry>();
@@ -109,9 +112,12 @@ public class PCDManager {
 
         checkSum = new Adler32();
 
-        cv =
-                new CompatibilityChecker(this, failOnDependentJar, noWarnOnDependentJar);
+        cv = new CompatibilityChecker(this, failOnDependentJar, noWarnOnDependentJar);
         cfr = new ClassFileReader();
+    }
+
+    public void setPdbTextFormat(boolean pdbTextFormat) {
+        this.pdbTextFormat = pdbTextFormat;
     }
 
     public Enumeration<PCDEntry> entriesEnum() {
@@ -339,7 +345,11 @@ public class PCDManager {
 
         Utils.startTiming(Utils.TIMING_PDBWRITE);
         updateClassFilesInfoInPCD(res);
-        pcdc.save();
+        if (pdbTextFormat) {
+            pcdc.saveToText();
+        } else {
+            pcdc.save();
+        }
         Utils.stopAndPrintTiming("PDB write", Utils.TIMING_PDBWRITE);
 
         if (res != 0) {
