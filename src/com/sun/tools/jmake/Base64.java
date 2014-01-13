@@ -6,6 +6,8 @@
  */
 package com.sun.tools.jmake;
 
+import java.util.Arrays;
+
 
 // JMake needs to run against old versions of Java, that may not have JAXB's
 // javax.xml.bind.DatatypeConverter. And we don't want JMake to depend on third-party external libraries,
@@ -22,7 +24,7 @@ public class Base64 {
     private static int[] digitToIndex = new int[128];
     static {
         assert(indexToDigit.length == 64);
-        for (int i = 0; i < 128; i++) digitToIndex[i] = -1;
+        Arrays.fill(digitToIndex, -1);
         for (int i = 0; i < indexToDigit.length; i++) digitToIndex[(int)indexToDigit[i]] = i;
     }
 
