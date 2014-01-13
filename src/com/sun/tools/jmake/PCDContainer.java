@@ -32,15 +32,27 @@ public class PCDContainer {
     }
 
     public static PCDContainer load(String storeName) {
+        return doLoad(storeName, false);
+    }
+
+    public static PCDContainer loadFromText(String storeName) {
+        return doLoad(storeName, true);
+    }
+
+    private static PCDContainer doLoad(String storeName, boolean fromText) {
         if (storeName == null) {
             storeName = Main.DEFAULT_STORE_NAME;
         }
         File storeFile = Utils.checkFileForName(storeName);
         if (storeFile != null) {
             Utils.printInfoMessageNoEOL("Opening project database...  ");
-            byte buf[] = Utils.readFileIntoBuffer(storeFile);
-            Hashtable<String,PCDEntry> pcd =
-                    new ProjectDatabaseReader().readProjectDatabase(buf, storeName);
+            Hashtable<String,PCDEntry> pcd;
+            if (fromText) {
+                pcd = new TextProjectDatabaseReader().readProjectDatabaseFromFile(storeFile);
+            } else {
+                byte buf[] = Utils.readFileIntoBuffer(storeFile);
+                pcd = new ProjectDatabaseReader().readProjectDatabase(buf, storeName);
+            }
             PCDContainer pcdc = new PCDContainer(pcd, storeName);
             Utils.printInfoMessage("Done.");
             return pcdc;
@@ -49,12 +61,24 @@ public class PCDContainer {
     }
 
     public void save() {
+        doSave(false);
+    }
+
+    public void saveToText() {
+        doSave(true);
+    }
+
+    private void doSave(boolean toText) {
         Utils.printInfoMessageNoEOL("Writing project database...  ");
         try {
-            byte[] buf = new ProjectDatabaseWriter().writeProjectDatabase(pcd);
-            FileOutputStream out = new FileOutputStream(storeName);
-            out.write(buf);
-            out.close();
+            if (toText) {
+                new TextProjectDatabaseWriter().writeProjectDatabaseToFile(new File(storeName), pcd);
+            } else {
+                byte[] buf = new ProjectDatabaseWriter().writeProjectDatabase(pcd);
+                FileOutputStream out = new FileOutputStream(storeName);
+                out.write(buf);
+                out.close();
+            }
             Utils.printInfoMessage("Done.");
         } catch (IOException e) {
             throw new PrivateException(e);

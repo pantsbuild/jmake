@@ -6,12 +6,12 @@
  */
 package com.sun.tools.jmake;
 
+import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Enumeration;
-
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 /**
@@ -20,15 +20,15 @@ import java.util.List;
  * @author Misha Dmitriev
  * @date 5 April 2004
  */
-public class ClassInfo {
+public class ClassInfo implements Serializable {
 
     public static final int VER_OLD = 0;  // Old version
     public static final int VER_NEW = 1;  // New version
     public static final int NO_VERSIONS = 2;  // Non-project class, no change tracking
-    private PCDManager pcdm;
-    int verCode;                          // Version code for this ClassInfo - one of the above.
+    private transient PCDManager pcdm;
+    transient int verCode;                          // Version code for this ClassInfo - one of the above.
     String name = null;
-    String packageName;                   // Package name; restored when database is reloaded
+    transient String packageName;                   // Package name; restored when database is reloaded
     int javacTargetRelease = Utils.JAVAC_TARGET_RELEASE_OLDEST; // Can have values from Utils.JAVAC_TARGET_RELEASE_xxx
     String cpoolRefsToClasses[];          // Directly referenced class names trimmed of array and 'L' prefixes and ';' suffixes
     boolean isRefClassArray[];            // Indicates if a directly referenced class is actually an array class
@@ -52,13 +52,13 @@ public class ClassInfo {
     String methodSignatures[];
     char methodAccessFlags[];
     String checkedExceptions[][];
-    ClassInfo directSubclasses[];       // Direct subclasses. Created lazily and not preserved on disk.
-    String directlyEnclosingClass;      // Directly enclosing class name; restored when database is reloaded
-    String topLevelEnclosingClass;      // Top-level enclosing class name; restored when database is reloaded
+    transient ClassInfo directSubclasses[];       // Direct subclasses. Created lazily and not preserved on disk.
+    transient String directlyEnclosingClass;      // Directly enclosing class name; restored when database is reloaded
+    transient String topLevelEnclosingClass;      // Top-level enclosing class name; restored when database is reloaded
     String nestedClasses[];             // Names of all nested classes. Don't make transient - it's used to check
     // if nested classes for this class were added/deleted in new version
-    char nestedClassAccessFlags[];      // No need to store this information permanently
-    boolean nestedClassNonMember[];     // Ditto
+    transient char nestedClassAccessFlags[];      // No need to store this information permanently
+    transient boolean nestedClassNonMember[];     // Ditto
 
     /** Creates new ClassInfo out of a class file. The last parameter is needed only to produce sensible error reports.*/
     public ClassInfo(byte[] classFileBytes, int verCode, PCDManager pcdm, String classFileFullPath) {

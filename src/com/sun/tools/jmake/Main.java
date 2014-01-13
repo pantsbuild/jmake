@@ -48,10 +48,11 @@ public class Main {
     Object externalApp = null;
     Method externalCompileSourceFilesMethod = null;
     private boolean failOnDependentJar = false,  noWarnOnDependentJar = false;
+    private boolean pdbTextFormat = false;
     private PCDManager pcdm = null;
     private static final String optNames[] = {"-h", "-help", "-d", "-pdb", "-C", "-jcpath", "-jcmainclass", "-jcmethod", "-jcexec", "-Xtiming", "-version",
-        "-warnlimit", "-failondependentjar", "-nowarnondependentjar", "-classpath", "-projclasspath", "-bootclasspath", "-extdirs", "-vpath"};
-    private static final int optArgs[] = {0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1};
+        "-warnlimit", "-failondependentjar", "-nowarnondependentjar", "-classpath", "-projclasspath", "-bootclasspath", "-extdirs", "-vpath", "-pdb-text-format"};
+    private static final int optArgs[] = {0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0};
     private static final int OPT_H = 0;
     private static final int OPT_HELP = 1;
     private static final int OPT_D = 2;
@@ -71,6 +72,7 @@ public class Main {
     private static final int OPT_BOOTCLASSPATH = 16;
     private static final int OPT_EXTDIRS = 17;
     private static final int OPT_VPATH = 18;
+    private static final int OPT_PDB_TEXT_FORMAT = 19;
 
     /** Construct a new instance of Main. */
     public Main() {
@@ -228,6 +230,9 @@ public class Main {
                             bailOut(ex.getMessage());
                         }
                         break;
+                    case OPT_PDB_TEXT_FORMAT:
+                        pdbTextFormat = true;
+                        break;
                     default:
                         bailOut(arg + ERR_IS_INVALID_OPTION);
                 }
@@ -324,13 +329,18 @@ public class Main {
             }
 
             Utils.startTiming(Utils.TIMING_PDBREAD);
-            PCDContainer pcdc = PCDContainer.load(pdbFileName);
+            PCDContainer pcdc;
+            if (pdbTextFormat) {
+                pcdc = PCDContainer.loadFromText(pdbFileName);
+            } else {
+                pcdc = PCDContainer.load(pdbFileName);
+            }
             Utils.stopAndPrintTiming("DB read", Utils.TIMING_PDBREAD);
 
             pcdm = new PCDManager(pcdc, allProjectJavaFileNames,
-                    addedJavaFileNames, removedJavaFileNames, updatedJavaFileNames,
-                    destDir, javacAddArgs,
-                    failOnDependentJar, noWarnOnDependentJar);
+                addedJavaFileNames, removedJavaFileNames, updatedJavaFileNames,
+                destDir, javacAddArgs, failOnDependentJar, noWarnOnDependentJar);
+            pcdm.setPdbTextFormat(pdbTextFormat);
 
             pcdm.initializeCompiler(jcExecApp, jcPath, jcMainClass, jcMethod, externalApp, externalCompileSourceFilesMethod);
 
@@ -679,7 +689,7 @@ public class Main {
     /**
      * Customize the output of <b>jmake</b>.
      *
-     * @see #setOutputStreams(PrintStream, PrintStream)
+     * @see #setOutputStreams(PrintStream, PrintStream, PrintStream)
      *
      * @param printInfoMessages    specify whether to print information messages
      * @param printWarningMessages specify whether to print warning messages
@@ -726,8 +736,8 @@ public class Main {
      *
      * @see #setClassPath(String)
      *
-     * @param classPath  the value of the class path, in the usual format (i.e. entries that are directories
-     *                   or JARs, separated by colon or semicolon depending on the platform).
+     * @param projectClassPath  the value of the class path, in the usual format (i.e. entries that are directories
+     *                          or JARs, separated by colon or semicolon depending on the platform).
      *
      * @throws PublicExceptions.InvalidCmdOptionException   if invalid class path value is specified.
      */
@@ -858,6 +868,7 @@ public class Main {
         Utils.printInfoMessage("  -h, -help             print this help message");
         Utils.printInfoMessage("  -version              print the product version number");
         Utils.printInfoMessage("  -pdb <file name>      specify non-default project database file");
+        Utils.printInfoMessage("  -pdb-text-format      if specified, pdb file is stored in text format");
         Utils.printInfoMessage("  -d <directory>        specify where to place generated class files");
         Utils.printInfoMessage("  -classpath <path>     specify where to find user class files");
         Utils.printInfoMessage("  -projclasspath <path> specify where to find sourceless project classes");
