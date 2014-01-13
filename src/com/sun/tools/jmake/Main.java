@@ -868,6 +868,7 @@ public class Main {
         Utils.printInfoMessage("  -h, -help             print this help message");
         Utils.printInfoMessage("  -version              print the product version number");
         Utils.printInfoMessage("  -pdb <file name>      specify non-default project database file");
+        Utils.printInfoMessage("  -pdb-text-format      if specified, pdb file is stored in text format");
         Utils.printInfoMessage("  -d <directory>        specify where to place generated class files");
         Utils.printInfoMessage("  -classpath <path>     specify where to find user class files");
         Utils.printInfoMessage("  -projclasspath <path> specify where to find sourceless project classes");

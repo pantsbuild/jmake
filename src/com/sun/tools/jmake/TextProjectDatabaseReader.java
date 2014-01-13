@@ -46,6 +46,7 @@ public class TextProjectDatabaseReader {
                 PCDEntry entry = new PCDEntry(className, javaFullFilePath, oldClassFileLastModified,
                     oldClassFileFingerprint, ci);
                 pcd.put(entry.className, entry);
+                line = in.readLine();
             }
         } catch (IOException e) {
             throw new PrivateException(e);
