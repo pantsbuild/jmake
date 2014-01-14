@@ -11,6 +11,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 
+/**
+ * This class implements writing a text stream representing a project database.
+ *
+ * @see com.sun.tools.jmake.TextProjectDatabaseReader for details.
+ *
+ * @author  Benjy Weinberger
+ * @date 13 January 2013
+ */
 public class TextProjectDatabaseWriter {
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();  // Reusable temp buffer.
 

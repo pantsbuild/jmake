@@ -25,21 +25,15 @@ public class PCDContainer {
     record containing information about the class */
     Hashtable<String,PCDEntry> pcd;
     String storeName;
+    boolean textFormat;
 
-    private PCDContainer(Hashtable<String,PCDEntry> pcd, String storeName) {
+    private PCDContainer(Hashtable<String,PCDEntry> pcd, String storeName, boolean textFormat) {
         this.storeName = storeName;
         this.pcd = pcd;
+        this.textFormat = textFormat;
     }
 
-    public static PCDContainer load(String storeName) {
-        return doLoad(storeName, false);
-    }
-
-    public static PCDContainer loadFromText(String storeName) {
-        return doLoad(storeName, true);
-    }
-
-    private static PCDContainer doLoad(String storeName, boolean fromText) {
+    public static PCDContainer load(String storeName, boolean textFormat) {
         if (storeName == null) {
             storeName = Main.DEFAULT_STORE_NAME;
         }
@@ -47,41 +41,26 @@ public class PCDContainer {
         if (storeFile != null) {
             Utils.printInfoMessageNoEOL("Opening project database...  ");
             Hashtable<String,PCDEntry> pcd;
-            if (fromText) {
+            if (textFormat) {
                 pcd = new TextProjectDatabaseReader().readProjectDatabaseFromFile(storeFile);
             } else {
-                byte buf[] = Utils.readFileIntoBuffer(storeFile);
-                pcd = new ProjectDatabaseReader().readProjectDatabase(buf, storeName);
+                pcd = new BinaryProjectDatabaseReader().readProjectDatabaseFromFile(storeFile);
             }
-            PCDContainer pcdc = new PCDContainer(pcd, storeName);
+            PCDContainer pcdc = new PCDContainer(pcd, storeName, textFormat);
             Utils.printInfoMessage("Done.");
             return pcdc;
         }
-        return new PCDContainer(null, storeName);
+        return new PCDContainer(null, storeName, textFormat);
     }
 
     public void save() {
-        doSave(false);
-    }
-
-    public void saveToText() {
-        doSave(true);
-    }
-
-    private void doSave(boolean toText) {
         Utils.printInfoMessageNoEOL("Writing project database...  ");
-        try {
-            if (toText) {
-                new TextProjectDatabaseWriter().writeProjectDatabaseToFile(new File(storeName), pcd);
-            } else {
-                byte[] buf = new ProjectDatabaseWriter().writeProjectDatabase(pcd);
-                FileOutputStream out = new FileOutputStream(storeName);
-                out.write(buf);
-                out.close();
-            }
-            Utils.printInfoMessage("Done.");
-        } catch (IOException e) {
-            throw new PrivateException(e);
+        File outfile = new File(storeName);
+        if (textFormat) {
+            new TextProjectDatabaseWriter().writeProjectDatabaseToFile(outfile, pcd);
+        } else {
+            new BinaryProjectDatabaseWriter().writeProjectDatabaseToFile(outfile, pcd);
         }
+        Utils.printInfoMessage("Done.");
     }
 }

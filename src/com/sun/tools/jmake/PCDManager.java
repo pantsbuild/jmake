@@ -64,7 +64,6 @@ public class PCDManager {
     private ClassFileReader cfr;
     private boolean newProject = false;
     private static boolean backSlashFileSeparator = File.separatorChar != '/';
-    private boolean pdbTextFormat = false;
 
     /**** Interface to the class ****/
     /**
@@ -114,10 +113,6 @@ public class PCDManager {
 
         cv = new CompatibilityChecker(this, failOnDependentJar, noWarnOnDependentJar);
         cfr = new ClassFileReader();
-    }
-
-    public void setPdbTextFormat(boolean pdbTextFormat) {
-        this.pdbTextFormat = pdbTextFormat;
     }
 
     public Enumeration<PCDEntry> entriesEnum() {
@@ -345,11 +340,7 @@ public class PCDManager {
 
         Utils.startTiming(Utils.TIMING_PDBWRITE);
         updateClassFilesInfoInPCD(res);
-        if (pdbTextFormat) {
-            pcdc.saveToText();
-        } else {
-            pcdc.save();
-        }
+        pcdc.save();
         Utils.stopAndPrintTiming("PDB write", Utils.TIMING_PDBWRITE);
 
         if (res != 0) {

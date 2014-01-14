@@ -6,6 +6,7 @@
  */
 package com.sun.tools.jmake;
 
+import java.io.File;
 import java.util.Hashtable;
 
 
@@ -15,13 +16,18 @@ import java.util.Hashtable;
  * @author  Misha Dmitriev
  * @date 2 March 2005
  */
-public class ProjectDatabaseReader extends BinaryFileReader {
+public class BinaryProjectDatabaseReader extends BinaryFileReader {
 
     private String stringTable[];
     private Hashtable<String,PCDEntry> pcd;
     private int nOfEntries;
     private int pdbFormat;  // Currently supported values: 0x01030300 (jmake 1.3.3 and newer versions); 1 (all older versions)
     // These are defined in Utils as PDB_FORMAT_CODE_LATEST and PDB_FORMAT_CODE_OLD
+
+    public Hashtable<String,PCDEntry> readProjectDatabaseFromFile(File infile) {
+        byte buf[] = Utils.readFileIntoBuffer(infile);
+        return readProjectDatabase(buf, infile.toString());
+    }
 
     public Hashtable<String,PCDEntry> readProjectDatabase(byte[] pdbFile,
             String pdbFileFullPath) {

@@ -9,19 +9,22 @@ package com.sun.tools.jmake;
 import java.util.Arrays;
 
 
-// JMake needs to run against old versions of Java, that may not have JAXB's
-// javax.xml.bind.DatatypeConverter. And we don't want JMake to depend on third-party external libraries,
-// especially not just for this.  So we implement a lightweight Base64 converter here ourselves.
-//
-// Note that sun.misc.BASE64Encoder is not official API and can go away at any time. Plus it inserts
-// line breaks into its emitted string, which is not what we want. So we can't use that either.
+/**
+ * JMake needs to run against old versions of Java, that may not have JAXB's
+ * javax.xml.bind.DatatypeConverter. And we don't want JMake to depend on third-party external libraries,
+ * especially not just for this.  So we implement a lightweight Base64 converter here ourselves.
 
-// The easiest way to grok this code is to think of Base64 as the following chain of
-// conversions (ignoring padding issues):
-// 3 bytes -> 24 bits -> 4 6-bit nibbles -> 4 indexes from 0-63 -> 4 characters.
+ * Note that sun.misc.BASE64Encoder is not official API and can go away at any time. Plus it inserts
+ * line breaks into its emitted string, which is not what we want. So we can't use that either.
+ */
+
 public class Base64 {
-    private static char[] indexToDigit = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static int[] digitToIndex = new int[128];
+    // The easiest way to grok this code is to think of Base64 as the following chain of
+    // conversions (ignoring padding issues):
+    // 3 bytes -> 24 bits -> 4 6-bit nibbles -> 4 indexes from 0-63 -> 4 characters.
+    private static final char[] indexToDigit =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+    private static final int[] digitToIndex = new int[128];
     static {
         assert(indexToDigit.length == 64);
         Arrays.fill(digitToIndex, -1);

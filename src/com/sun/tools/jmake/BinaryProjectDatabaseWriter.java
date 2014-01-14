@@ -6,6 +6,9 @@
  */
 package com.sun.tools.jmake;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
@@ -15,13 +18,24 @@ import java.util.Enumeration;
  * @author  Misha Dmitriev
  * @date 2 March 2005
  */
-public class ProjectDatabaseWriter extends BinaryFileWriter {
+public class BinaryProjectDatabaseWriter extends BinaryFileWriter {
 
     private Hashtable pcd = null;
     private int nOfEntries;
     private byte[] stringBuf;
     private int curStringBufPos,  stringBufInc,  curStringBufWatermark,  stringCount;
     private StringHashTable stringHashTable = null;
+
+    public void writeProjectDatabaseToFile(File outfile, Hashtable pcd) {
+        try {
+            byte[] buf = new BinaryProjectDatabaseWriter().writeProjectDatabase(pcd);
+            FileOutputStream out = new FileOutputStream(outfile);
+            out.write(buf);
+            out.close();
+        } catch (IOException e) {
+            throw new PrivateException(e);
+        }
+    }
 
     public byte[] writeProjectDatabase(Hashtable pcd) {
         this.pcd = pcd;
