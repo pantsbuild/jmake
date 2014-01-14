@@ -330,17 +330,12 @@ public class Main {
 
             Utils.startTiming(Utils.TIMING_PDBREAD);
             PCDContainer pcdc;
-            if (pdbTextFormat) {
-                pcdc = PCDContainer.loadFromText(pdbFileName);
-            } else {
-                pcdc = PCDContainer.load(pdbFileName);
-            }
+            pcdc = PCDContainer.load(pdbFileName, pdbTextFormat);
             Utils.stopAndPrintTiming("DB read", Utils.TIMING_PDBREAD);
 
             pcdm = new PCDManager(pcdc, allProjectJavaFileNames,
                 addedJavaFileNames, removedJavaFileNames, updatedJavaFileNames,
                 destDir, javacAddArgs, failOnDependentJar, noWarnOnDependentJar);
-            pcdm.setPdbTextFormat(pdbTextFormat);
 
             pcdm.initializeCompiler(jcExecApp, jcPath, jcMainClass, jcMethod, externalApp, externalCompileSourceFilesMethod);
 

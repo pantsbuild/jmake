@@ -10,6 +10,16 @@ import java.io.*;
 import java.util.Hashtable;
 
 
+/**
+ * This class creates the internal representation of the project database from a text buffer.
+ *
+ * The Pants build tool manipulates this data in various ways, and it's easiest for it
+ * to do so by parsing text files directly.  This brings JMake into line with Zinc (the
+ * Scala incremental compiler) and allows Pants to handle both uniformly.
+ *
+ * @author  Benjy Weinberger
+ * @date 13 January 2013
+ */
 public class TextProjectDatabaseReader {
     public Hashtable<String,PCDEntry> readProjectDatabaseFromFile(File infile) {
         try {

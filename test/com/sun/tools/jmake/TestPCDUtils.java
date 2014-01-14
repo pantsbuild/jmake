@@ -16,21 +16,13 @@ public class TestPCDUtils {
     }
 
     public static PCDContainer loadPDB(String pdbFile, boolean textFormat) {
-        if (textFormat) {
-            return PCDContainer.loadFromText(pdbFile);
-        } else {
-            return PCDContainer.load(pdbFile);
-        }
+        return PCDContainer.load(pdbFile, textFormat);
     }
 
     public static void savePDB(PCDContainer pcd, String pdbFile, boolean textFormat) {
         new File(pdbFile).getParentFile().mkdirs();
         pcd.storeName = pdbFile;
-        if (textFormat) {
-            pcd.saveToText();
-        } else {
-            pcd.save();
-        }
+        pcd.save();
     }
 
     public static boolean comparePCDContainers(PCDContainer l, PCDContainer r) {
