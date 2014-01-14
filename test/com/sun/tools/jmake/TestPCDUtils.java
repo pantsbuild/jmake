@@ -19,7 +19,7 @@ public class TestPCDUtils {
         return PCDContainer.load(pdbFile, textFormat);
     }
 
-    public static void savePDB(PCDContainer pcd, String pdbFile, boolean textFormat) {
+    public static void savePDB(PCDContainer pcd, String pdbFile) {
         new File(pdbFile).getParentFile().mkdirs();
         pcd.storeName = pdbFile;
         pcd.save();

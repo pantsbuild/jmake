@@ -13,7 +13,7 @@ public class PCDSerializationTest {
         String pcdPath = TestPCDUtils.generatePCD(textFormat);
         String roundTripPcdPath = "build/test/generate_test_pcd/scratchpad/test_roundtrip.pcd";
         PCDContainer pcd = TestPCDUtils.loadPDB(pcdPath, textFormat);
-        TestPCDUtils.savePDB(pcd, roundTripPcdPath, textFormat);
+        TestPCDUtils.savePDB(pcd, roundTripPcdPath);
         PCDContainer roundtripPcd = TestPCDUtils.loadPDB(roundTripPcdPath, textFormat);
         assertTrue(TestPCDUtils.comparePCDContainers(pcd, roundtripPcd));
     }
