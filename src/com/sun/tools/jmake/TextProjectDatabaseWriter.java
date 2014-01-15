@@ -21,7 +21,7 @@ import java.util.*;
 public class TextProjectDatabaseWriter {
     private static Set<String> primitives = new HashSet<String>(
         Arrays.asList("boolean", "byte", "char", "double", "float", "int", "long", "short",
-            "Z",       "B",    "C",    "D",      "F",     "I",   "J",    "S"));
+                      "Z", "B", "C", "D", "F", "I", "J", "S"));
 
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();  // Reusable temp buffer.
 
