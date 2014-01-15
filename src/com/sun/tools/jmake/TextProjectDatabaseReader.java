@@ -8,6 +8,8 @@ package com.sun.tools.jmake;
 
 import java.io.*;
 import java.util.Hashtable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -43,10 +45,20 @@ public class TextProjectDatabaseReader {
         Hashtable<String,PCDEntry> pcd = new Hashtable<String, PCDEntry>();
         try {
             String line = in.readLine();
-            while (line != null) {
+            if (!"pcd entries:".equals(line))
+                throw error("Expected: 'pcd entries:', got: " + line);
+            line = in.readLine();
+            Matcher m = Pattern.compile("^(\\d+) items$").matcher(line);
+            if (!m.matches())
+                throw error("Expected: '<n> items', got: " + line);
+            int numEntries = Integer.parseInt(m.group(1));
+            for (int i = 0; i < numEntries; i++) {
+                line = in.readLine();
+                if (line == null)
+                    throw error("Unexpected EOF");
                 String[] parts = line.split("\t");
                 if (parts.length != 5) {
-                    throw new PrivateException(new IllegalArgumentException("Invalid line: " + line));
+                    throw error("Invalid line: " + line);
                 }
                 String className = parts[0];
                 String javaFullFilePath = parts[1];
@@ -56,12 +68,17 @@ public class TextProjectDatabaseReader {
                 PCDEntry entry = new PCDEntry(className, javaFullFilePath, oldClassFileLastModified,
                     oldClassFileFingerprint, ci);
                 pcd.put(entry.className, entry);
-                line = in.readLine();
             }
+            // We're done: We have detailed dep information in the PCD entries, so we don't
+            // need to read the dep information lines from the file.
         } catch (IOException e) {
             throw new PrivateException(e);
         }
         return pcd;
+    }
+
+    private PrivateException error(String msg) {
+        return new PrivateException(new IllegalArgumentException(msg));
     }
 
     private ClassInfo classInfoFromBase64(String s) {
