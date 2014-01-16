@@ -7,8 +7,7 @@
 package com.sun.tools.jmake;
 
 import java.io.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.*;
 
 
 /**
@@ -20,6 +19,10 @@ import java.util.Hashtable;
  * @date 13 January 2013
  */
 public class TextProjectDatabaseWriter {
+    private static Set<String> primitives = new HashSet<String>(
+        Arrays.asList("boolean", "byte", "char", "double", "float", "int", "long", "short",
+                      "Z", "B", "C", "D", "F", "I", "J", "S"));
+
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();  // Reusable temp buffer.
 
     public void writeProjectDatabaseToFile(File outfile, Hashtable<String, PCDEntry> pcd) {
@@ -40,12 +43,64 @@ public class TextProjectDatabaseWriter {
     }
 
 	public void writeProjectDatabase(Writer out, Hashtable<String,PCDEntry> pcd) {
-        Enumeration<PCDEntry> entries = pcd.elements();
-        while (entries.hasMoreElements()) {
-            PCDEntry entry = entries.nextElement();
-            writePCDEntry(out, entry);
+        try {
+            out.write("pcd entries:\n");
+            out.write(Integer.toString(pcd.size()));
+            out.write(" items\n");
+            Map<String, Set<String>> depsBySource = new HashMap<String, Set<String>>();
+            Enumeration<PCDEntry> entries = pcd.elements();
+            while (entries.hasMoreElements()) {
+                PCDEntry entry = entries.nextElement();
+                writePCDEntry(out, entry);
+                Set<String> deps = depsBySource.get(entry.javaFileFullPath);
+                if (deps == null) {
+                    deps = new HashSet<String>();
+                    depsBySource.put(entry.javaFileFullPath, deps);
+                }
+                addDepsFromClassInfo(deps, entry.oldClassInfo);
+            }
+            // Write out dependency information. Note that we don't need to read this back to recreate
+            // the PCD. We write it out here just as a convenience, so that external readers of the PDB
+            // file don't have to grok our internal ClassInfo structures.
+            out.write("dependencies:\n");
+            out.write(Integer.toString(depsBySource.size()));
+            out.write(" items\n");
+            for (Map.Entry<String, Set<String>> item : depsBySource.entrySet()) {
+                out.write(item.getKey());
+                for (String s : item.getValue()) {
+                    out.write('\t');
+                    out.write(s);
+                }
+                out.write('\n');
+            }
+        } catch (IOException e) {
+            throw new PrivateException(e);
         }
 	}
+
+    private void addDepsFromClassInfo(Set<String> deps, ClassInfo ci) {
+        for (String s : ci.cpoolRefsToClasses) {
+            int i = 0;
+            int j = s.length();
+
+            // Fix some inconsistencies in how we represent types internally:
+            // Despite the comment on ci.cpoolRefsToClasses, class names may be
+            // representing in it with '['s and with '@', '#' instead of 'L', ';'.
+            while (s.charAt(i) == '[') i++;
+            if (s.charAt(i) == '@') i++;
+            if (s.endsWith("#")) j--;
+            int k = s.indexOf('$');
+
+            // Take the outer class, on references to nested classes.
+            if (k != -1) j = k;
+            if (i > 0 || j < s.length())
+                s = s.substring(i, j);
+
+            // We don't need to record deps on primitive types, or arrays of them.
+            if (!primitives.contains(s))
+                deps.add(s);
+        }
+    }
 
 	private void writePCDEntry(Writer out, PCDEntry entry) {
         try {
