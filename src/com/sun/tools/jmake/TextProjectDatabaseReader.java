@@ -42,7 +42,7 @@ public class TextProjectDatabaseReader {
     }
 
     public Hashtable<String,PCDEntry> readProjectDatabase(BufferedReader in) {
-        Hashtable<String,PCDEntry> pcd = new Hashtable<String, PCDEntry>();
+        Hashtable<String,PCDEntry> pcd;
         try {
             String line = in.readLine();
             if (!"pcd entries:".equals(line))
@@ -52,6 +52,7 @@ public class TextProjectDatabaseReader {
             if (!m.matches())
                 throw error("Expected: '<n> items', got: " + line);
             int numEntries = Integer.parseInt(m.group(1));
+            pcd = new Hashtable<String, PCDEntry>(numEntries);
             for (int i = 0; i < numEntries; i++) {
                 line = in.readLine();
                 if (line == null)
