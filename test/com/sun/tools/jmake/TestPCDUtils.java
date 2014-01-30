@@ -80,20 +80,20 @@ public class TestPCDUtils {
             ;
     }
 
-    private static boolean safeEquals(Object l, Object r) {
-        return (l == null && r == null) || l.equals(r);
-    }
+    public static String compile(String testRoot, File[] sources, boolean textFormat) {
+        File testRootDir = new File(testRoot);
+        File pdbFile = new File(testRootDir, "test.pdb");
+        File outputDir = new File(testRootDir, "classes");
 
-    private static String compileJMake(boolean textFormat) {
-        String testRoot = "build/test/generate_test_pcd";
-        String pdbFile = testRoot + "/test.pdb";
-        new File(pdbFile).delete();  // Ensure a clean compile.
-        File[] sources = getAllJMakeSources();
+        // Ensure a clean compile.
+        pdbFile.delete();
+        nuke(outputDir);
+
         ArrayList<String> argsList = new ArrayList<String>();
         argsList.add("-d");
-        argsList.add(testRoot + "/classes");
+        argsList.add(outputDir.getPath());
         argsList.add("-pdb");
-        argsList.add(pdbFile);
+        argsList.add(pdbFile.getPath());
         if (textFormat) {
             argsList.add("-pdb-text-format");
         }
@@ -102,7 +102,33 @@ public class TestPCDUtils {
         }
         String[] args = argsList.toArray(new String[argsList.size()]);
         Main.main(args);
-        return pdbFile;
+        return pdbFile.getPath();
+    }
+
+    private static void nuke(File f) {
+        if (f.isDirectory()) {
+            try {
+                for (File child : f.listFiles())
+                    nuke(child);
+            } catch (NullPointerException e) {
+                // Should never happen, since we've checked that f is a directory.
+                throw new RuntimeException(e);
+            }
+        }
+        f.delete();
+    }
+
+    private static boolean safeEquals(Object l, Object r) {
+        if (l == null)
+            return (r == null);
+        else
+            return l.equals(r);
+    }
+
+    private static String compileJMake(boolean textFormat) {
+        String testRoot = "build/test/generate_test_pcd";
+        File[] sources = getAllJMakeSources();
+        return compile(testRoot, sources, textFormat);
     }
 
     private static File[] getAllJMakeSources() {

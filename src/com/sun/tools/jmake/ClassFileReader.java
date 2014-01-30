@@ -415,11 +415,11 @@ public class ClassFileReader extends BinaryFileReader {
      * classes are read.
      */
     private void readAttributes() {
-        int i, j;
+        String nestedClassPrefix = classInfo.name + "$";
 
         char attrCount = nextChar();
 
-        for (i = 0; i < attrCount; i++) {
+        for (int i = 0; i < attrCount; i++) {
             int attrNameIdx = nextChar();
             int attrLen = nextInt();
             if (utf8AtCPIndex(attrNameIdx).equals("InnerClasses")) {
@@ -428,8 +428,7 @@ public class ClassFileReader extends BinaryFileReader {
                 char nestedClassAccessFlags[] = new char[nOfClasses];
                 boolean nestedClassNonMember[] = new boolean[nOfClasses];
                 int curIdx = 0;
-                int nonMemberClassCount = 1;
-                for (j = 0; j < nOfClasses; j++) {
+                for (int j = 0; j < nOfClasses; j++) {
                     int innerClassInfoIdx = nextChar();
                     int outerClassInfoIdx = nextChar();
                     int innerClassNameIdx = nextChar();
@@ -439,47 +438,38 @@ public class ClassFileReader extends BinaryFileReader {
                     // outerClassInfoIdx == 0), we still should take this class into account, since it may e.g. extend
                     // a public class/implement a public interface, which, in turn, may be changed incompatibly.
 
-                    String nestedClassFullName =
-                            classNameAtCPIndex(getChar(cpOffsets[innerClassInfoIdx]));
+                    String nestedClassFullName = classNameAtCPIndex(getChar(cpOffsets[innerClassInfoIdx]));
 
-                    // We are only interested in references to nested classes whose enclosing class is this one.
-                    if (innerClassNameIdx != 0) {  // Nested class is not anonymous
-                        String nestedClassSimpleName =
-                                utf8AtCPIndex(innerClassNameIdx);
-                        if (!nestedClassFullName.equals(classInfo.name + "$" + nestedClassSimpleName)) {
-                            // Let's check if it's a local class, with the name like "EncClass$1$Local" (prior to JDK 1.5) or "EncClass$1Local" (JDK 1.5)
-                            if (classInfo.javacTargetRelease == Utils.JAVAC_TARGET_RELEASE_OLDEST) {
-                                int count = nonMemberClassCount + 1;
-                                if (!nestedClassFullName.equals(classInfo.name + "$" + count + "$" + nestedClassSimpleName)) {
-                                    continue;
-                                } else {
-                                    nonMemberClassCount = count;
-                                }
-                            } else { // JDK 1.5
-                                if (nestedClassFullName.startsWith(classInfo.name + "$") && nestedClassFullName.endsWith(nestedClassSimpleName)) {
-                                    int k = classInfo.name.length() + 1;
-                                    int endIdx =
-                                            nestedClassFullName.length() - nestedClassSimpleName.length();
-                                    for (; k < endIdx; k++) {
-                                        if (!Character.isDigit(nestedClassFullName.charAt(k))) {
-                                            break;
-                                        }
-                                    }
-                                    if (k < endIdx) {
-                                        continue;
-                                    }
-                                } else {
-                                    continue;
-                                }
-                            }
-                        }
-                    } else {                       // Nested class is anonymous
-                        if (!nestedClassFullName.equals(classInfo.name + "$" + nonMemberClassCount)) {
+                    // We are only interested the nested classes whose enclosing class is this one.
+                    if (!nestedClassFullName.startsWith(nestedClassPrefix))
+                        continue;
+
+                    // We are only interested in the directly nested classes of this class.
+                    String nestedClassNameSuffix = nestedClassFullName.substring(nestedClassPrefix.length());
+
+                    if (innerClassNameIdx == 0) {
+                        // Nested class is anonymous. Suffix must be all digits.
+                        if (findFirstNonDigit(nestedClassNameSuffix) != -1)
                             continue;
-                        } else {
-                            nonMemberClassCount++;
+                    } else {
+                        // Nested class is named.
+                        String nestedClassSimpleName = utf8AtCPIndex(innerClassNameIdx);
+                        // The simple case is Outer$Inner.
+                        if (!nestedClassNameSuffix.equals(nestedClassSimpleName)) {
+                            // The more complicated case is a local class. In JDK 1.5+ These are named,
+                            // e.g., Outer$1Inner. Pre-JDK 1.5 they are named e.g., Outer$1$Inner.
+                            int p = findFirstNonDigit(nestedClassNameSuffix);
+                            if (p == -1)
+                                continue;
+                            if (classInfo.javacTargetRelease == Utils.JAVAC_TARGET_RELEASE_OLDEST &&
+                                nestedClassNameSuffix.charAt(p++) != '$')
+                                continue;
+                            if (!nestedClassNameSuffix.substring(p).equals(nestedClassSimpleName))
+                                continue;
                         }
                     }
+
+                    // The name has passed all checks, so register it.
 
                     nestedClasses[curIdx] = nestedClassFullName;
                     nestedClassAccessFlags[curIdx] = innerClassAccessFlags;
@@ -504,6 +494,14 @@ public class ClassFileReader extends BinaryFileReader {
                 curBufPos += attrLen;
             }
         }
+    }
+
+    private int findFirstNonDigit(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isDigit(s.charAt(i)))
+                return i;
+        }
+        return -1;
     }
 
     private String utf8AtCPIndex(int idx) {
