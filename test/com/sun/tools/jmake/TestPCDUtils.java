@@ -107,13 +107,8 @@ public class TestPCDUtils {
 
     private static void nuke(File f) {
         if (f.isDirectory()) {
-            try {
-                for (File child : f.listFiles())
-                    nuke(child);
-            } catch (NullPointerException e) {
-                // Should never happen, since we've checked that f is a directory.
-                throw new RuntimeException(e);
-            }
+            for (File child : f.listFiles())
+                nuke(child);
         }
         f.delete();
     }
