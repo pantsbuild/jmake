@@ -2,7 +2,6 @@ package com.sun.tools.jmake;
 
 import org.junit.Test;
 
-import java.io.File;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashSet;
