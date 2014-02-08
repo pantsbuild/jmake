@@ -86,7 +86,9 @@ public class TextProjectDatabaseReader {
         try {
             byte[] bytes = Base64.decode(s.toCharArray());
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            return (ClassInfo)ois.readObject();
+            ClassInfo ret = (ClassInfo)ois.readObject();
+            ret.initializeImmediateTransientFields();
+            return ret;
         } catch (IOException e) {
             throw new PrivateException(e);
         } catch (ClassNotFoundException e) {
