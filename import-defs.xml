@@ -53,8 +53,8 @@
                      token="@NAME@" value="@{name}"/>
             <import file="${build.dir}/xml_generated/import-@{name}.xml"/>
         </sequential>
-    </macrodef>        
-   
+    </macrodef>
+
     <do-import-setup name="junit"/>
 
     <do-import-setup name="findbugs"/>
@@ -63,6 +63,9 @@
 
     <target name="import" depends="import-junit, import-findbugs, import-pmd"
             description="Import all items needed">
+        <!-- The findbugs tarball has executables we need that do
+             not have the execute bit flipped - fix that -->
+        <chmod file="${findbugs.file.reference}" perm="ugo+rx"/>
     </target>
 
 </project>
