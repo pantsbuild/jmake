@@ -8,3 +8,5 @@ date:        Wed Jun 02 10:47:01 2010 -0500
 summary:     1.  Update version to 1.3.7
 
 uses http://hg-git.github.com/ to inteoperate with the parent
+
+The intent is to get any changes here patched into the mainline.
