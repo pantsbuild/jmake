@@ -819,7 +819,9 @@ public class PCDManager {
             PCDEntry pcde =
                     findClassFileOnFilesystem(javaFileFullPath, null, null);
             if (pcde == null) {
-                continue;                 // .class file not found - compilation error
+                // .class file not found - compilation error
+                throw new PrivateException(new PublicExceptions.ClassNameMismatchException(
+                        "Could not find class file for " + javaFileFullPath));
             }
             if (pcde.checkResult == PCDEntry.CV_NEW) {  // It's really a new .java file, not a moved one
                 findAndUpdateAllNestedClassesForClass(pcde, false);
@@ -992,9 +994,10 @@ public class PCDManager {
                             findClassFileOnFilesystem(null, pcde, nestedClasses[i]);
                 }
                 // For classes that come from a .jar, pcde should already be there. Otherwise this class just doesn't exist.
-                // Probably we should issue an error or at least a warning in that case?
                 if (nestedPCDE == null) {
-                    continue;  // Probably a compilation error, such that enclosing class is compiled but nested is not.
+                    // Probably a compilation error, such that enclosing class is compiled but nested is not.
+                    throw new PrivateException(new PublicExceptions.ClassNameMismatchException(
+                            "Could not find class file for " + pcde.toString()));
                 }
             }
             if (move) {
