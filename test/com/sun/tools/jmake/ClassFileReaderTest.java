@@ -18,10 +18,10 @@ public class ClassFileReaderTest {
     public void testNestedClassDetection() {
         String testRoot = "build/test/nested_class_detection";
         File[] sources = { new File("test/classfilereader/Parent.java") };
-        String pcdPath = TestPCDUtils.compile(testRoot, sources, textFormat);
+        String pdbPath = TestPCDUtils.compile(testRoot, sources, textFormat).getPdbPath();
         // It would be nicer to run the ClassFileReader directly, but alas it's too deeply
         // intertwined with ClassInfo and PCDManager.
-        PCDContainer pcd = TestPCDUtils.loadPDB(pcdPath, textFormat);
+        PCDContainer pcd = TestPCDUtils.loadPDB(pdbPath, textFormat);
         PCDEntry entry = pcd.pcd.get("classfilereader/Parent");
         Set<String> nestedClasses = new TreeSet<String>(Arrays.asList(entry.oldClassInfo.nestedClasses));
         String[] expectedClassesArray = {

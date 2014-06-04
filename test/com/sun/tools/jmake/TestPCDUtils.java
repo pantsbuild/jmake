@@ -80,7 +80,7 @@ public class TestPCDUtils {
             ;
     }
 
-    public static String compile(String testRoot, File[] sources, boolean textFormat) {
+    public static CompileResult compile(String testRoot, File[] sources, boolean textFormat) {
         File testRootDir = new File(testRoot);
         File pdbFile = new File(testRootDir, "test.pdb");
         File outputDir = new File(testRootDir, "classes");
@@ -101,8 +101,11 @@ public class TestPCDUtils {
             argsList.add(src.toString());
         }
         String[] args = argsList.toArray(new String[argsList.size()]);
-        Main.main(args);
-        return pdbFile.getPath();
+
+        Main m = new Main();
+        int exitCode = m.mainExternal(args);
+
+        return new CompileResult(exitCode, pdbFile.getPath());
     }
 
     private static void nuke(File f) {
@@ -123,7 +126,7 @@ public class TestPCDUtils {
     private static String compileJMake(boolean textFormat) {
         String testRoot = "build/test/generate_test_pcd";
         File[] sources = getAllJMakeSources();
-        return compile(testRoot, sources, textFormat);
+        return compile(testRoot, sources, textFormat).getPdbPath();
     }
 
     private static File[] getAllJMakeSources() {

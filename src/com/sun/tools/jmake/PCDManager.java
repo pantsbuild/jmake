@@ -818,10 +818,15 @@ public class PCDManager {
             String javaFileFullPath = newJavaFiles.get(i);
             PCDEntry pcde =
                     findClassFileOnFilesystem(javaFileFullPath, null, null);
+
             if (pcde == null) {
-                // .class file not found - compilation error
-                throw new PrivateException(new PublicExceptions.ClassNameMismatchException(
-                        "Could not find class file for " + javaFileFullPath));
+                // .class file not found - possible compilation error
+                if (missingClassIsOk(javaFileFullPath)) {
+                    continue;
+                } else {
+                    throw new PrivateException(new PublicExceptions.ClassNameMismatchException(
+                            "Could not find class file for " + javaFileFullPath));
+                }
             }
             if (pcde.checkResult == PCDEntry.CV_NEW) {  // It's really a new .java file, not a moved one
                 findAndUpdateAllNestedClassesForClass(pcde, false);
@@ -834,6 +839,18 @@ public class PCDManager {
             String newJarFile = iter.next();
             processAllClassesFromJarFile(newJarFile);
         }
+    }
+
+    /**
+     * In most cases we want to fail the build if a class cannot be found.
+     *
+     * However there is one common valid case where a .java file might not contain
+     * a class: package-info.java files.
+     *
+     * See this doc for more info: http://docs.oracle.com/javase/specs/jls/se7/html/jls-7.html
+     */
+    private boolean missingClassIsOk(String javaFileFullPath) {
+        return javaFileFullPath != null && "package-info.java".equals(new File(javaFileFullPath).getName());
     }
 
     /**
