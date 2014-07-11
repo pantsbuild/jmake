@@ -6,12 +6,9 @@
  */
 package com.sun.tools.jmake;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Enumeration;
-
 import java.lang.reflect.Modifier;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * This class implements finding classes referencing other classes and members in various ways.
@@ -40,7 +37,7 @@ public class RefClassFinder {
     public void initialize(String checkedClassName, boolean checkedClassIsFromJar) {
         this.checkedClassName = checkedClassName;
         this.checkedClassIsFromJar = checkedClassIsFromJar;
-        affectedClassNames = new HashSet<String>();
+        affectedClassNames = new LinkedHashSet<String>();
     }
 
     /**
@@ -53,10 +50,9 @@ public class RefClassFinder {
             return null;
         } else {
             String[] ret = new String[size];
-            Iterator<String> iter = affectedClassNames.iterator();
             int i = 0;
-            while (iter.hasNext()) {
-                ret[i++] = iter.next();
+            for (String className : affectedClassNames) {
+                ret[i++] = className;
             }
             return ret;
         }
@@ -67,8 +63,7 @@ public class RefClassFinder {
      * Used if a compile-time constant is changed.
      */
     public void findAllProjectClasses(ClassInfo fieldClassInfo, int fieldNo) {
-        for (Enumeration pcdEntries = pcdm.entriesEnum(); pcdEntries.hasMoreElements();) {
-            PCDEntry pcde = (PCDEntry) pcdEntries.nextElement();
+        for (PCDEntry pcde : pcdm.entries()) {
             if (pcde.checkResult == PCDEntry.CV_DELETED) {
                 continue;
             }
@@ -105,10 +100,9 @@ public class RefClassFinder {
         String packageName = classInfo.packageName;
         boolean isPublic = classInfo.isPublic();
         boolean isInterface = classInfo.isInterface();
-        Enumeration<PCDEntry> pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -130,10 +124,9 @@ public class RefClassFinder {
     public void findDiffPackageAndNotSubReferencingClasses1(ClassInfo classInfo) {
         String packageName = classInfo.packageName;
         String directlyEnclosingClass = classInfo.directlyEnclosingClass;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -154,11 +147,9 @@ public class RefClassFinder {
      */
     public void findReferencingClasses1(ClassInfo classInfo) {
         String topLevelEnclosingClass = classInfo.topLevelEnclosingClass;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -181,11 +172,9 @@ public class RefClassFinder {
         String directlyEnclosingClass = classInfo.directlyEnclosingClass;
         String topLevelEnclosingClass = classInfo.topLevelEnclosingClass;
         String packageName = classInfo.packageName;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry entry : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, entry);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -210,11 +199,10 @@ public class RefClassFinder {
     public void findThisPackageReferencingClasses1(ClassInfo classInfo) {
         String topLevelEnclosingClass = classInfo.topLevelEnclosingClass;
         String packageName = classInfo.packageName;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry entry : pcdm.entries()) {
             ClassInfo clientInfo =
                     pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                        entry);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -236,11 +224,9 @@ public class RefClassFinder {
      */
     public void findDiffPackageReferencingClasses1(ClassInfo classInfo) {
         String packageName = classInfo.packageName;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -261,11 +247,9 @@ public class RefClassFinder {
     public void findDiffPackageAndSubReferencingClasses1(ClassInfo classInfo) {
         String packageName = classInfo.packageName;
         String directlyEnclosingClass = classInfo.directlyEnclosingClass;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -289,14 +273,12 @@ public class RefClassFinder {
      * direct/indirect superclass.
      */
     public void findReferencingClasses2(ClassInfo classInfo1, ClassInfo classInfo2) {
-        HashSet<String> refClazz1 = new HashSet<String>();
+        Set<String> refClazz1 = new LinkedHashSet<String>();
         findReferencingClasses(classInfo1, 2, false, refClazz1);
-        HashSet<String> refClazz2 = new HashSet<String>();
+        Set<String> refClazz2 = new LinkedHashSet<String>();
         findReferencingClasses(classInfo2, 2, false, refClazz2);
 
-        Iterator<String> iter1 = refClazz1.iterator();
-        while (iter1.hasNext()) {
-            String className1 = iter1.next();
+        for (String className1 : refClazz1) {
             if (refClazz2.contains(className1)) {
                 addToAffectedClassNames(className1);
             }
@@ -305,9 +287,8 @@ public class RefClassFinder {
 
     /** Find all project classes which are direct subclasses of the given class */
     public void findDirectSubclasses(ClassInfo classInfo) {
-        ClassInfo[] subclasses = classInfo.getDirectSubclasses();
-        for (int i = 0; i < subclasses.length; i++) {
-            addToAffectedClassNames(subclasses[i].name);
+        for (ClassInfo subclassInfo : classInfo.getDirectSubclasses()) {
+            addToAffectedClassNames(subclassInfo.name);
         }
     }
 
@@ -318,10 +299,9 @@ public class RefClassFinder {
      * interface I indirectly, if C or some superclass of C directly implements I or some sublcass of I.
      */
     public void findDirectlyAndOtherwiseImplementingConcreteClasses(ClassInfo intfInfo) {
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry entry : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, entry);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -341,12 +321,11 @@ public class RefClassFinder {
     }
 
     private void findAllNearestConcreteSubclasses(ClassInfo classInfo) {
-        ClassInfo[] subclasses = classInfo.getDirectSubclasses();
-        for (int i = 0; i < subclasses.length; i++) {
-            if (subclasses[i].isAbstract()) {
-                findAllNearestConcreteSubclasses(subclasses[i]);
+        for (ClassInfo subclassInfo : classInfo.getDirectSubclasses()) {
+            if (subclassInfo.isAbstract()) {
+                findAllNearestConcreteSubclasses(subclassInfo);
             } else {
-                addToAffectedClassNames(subclasses[i].name);
+                addToAffectedClassNames(subclassInfo.name);
             }
         }
     }
@@ -356,10 +335,9 @@ public class RefClassFinder {
      * a method with the given name. For those that overload this method, find referencing classes.
      */
     public void findAbstractSubtypesWithSameNameMethod(ClassInfo intfInfo, String mName, final String mSig) {
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo ci =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (ci == null) {
                 continue;  // New class or not in project
             }
@@ -439,9 +417,7 @@ public class RefClassFinder {
     }
 
     private void findSubclassesReimplementingMethod(ClassInfo targetClass, ClassInfo methodDeclaringClass, int methodNo) {
-        ClassInfo[] subclasses = targetClass.getDirectSubclasses();
-        for (int i = 0; i < subclasses.length; i++) {
-            ClassInfo subclass = subclasses[i];
+        for (ClassInfo subclass : targetClass.getDirectSubclasses()) {
             if (subclass.declaresMethod(methodDeclaringClass, methodNo)) {
                 addToAffectedClassNames(subclass.name);
             } else {
@@ -455,9 +431,7 @@ public class RefClassFinder {
      * or indirect abstract subclasses.
      */
     public void findConcreteSubclasses(ClassInfo targetClass) {
-        ClassInfo[] subclasses = targetClass.getDirectSubclasses();
-        for (int i = 0; i < subclasses.length; i++) {
-            ClassInfo subclass = subclasses[i];
+        for (ClassInfo subclass : targetClass.getDirectSubclasses()) {
             if (subclass.isAbstract()) {
                 findConcreteSubclasses(subclass);
             } else {
@@ -471,9 +445,7 @@ public class RefClassFinder {
      * of the given method.
      */
     public void findConcreteSubclassesNotOverridingAbstractMethod(ClassInfo targetClass, ClassInfo methodDeclaringClass, int methodNo) {
-        ClassInfo[] subclasses = targetClass.getDirectSubclasses();
-        for (int i = 0; i < subclasses.length; i++) {
-            ClassInfo subclass = subclasses[i];
+        for (ClassInfo subclass : targetClass.getDirectSubclasses()) {
             int pos =
                     subclass.getDeclaredMethodPos(methodDeclaringClass, methodNo);
             if (pos == -1) { // This method is not overridden in this class
@@ -492,10 +464,9 @@ public class RefClassFinder {
 
     /** Find all project classes that reference any method that throws the given exception. */
     public void findRefsToMethodsThrowingException(ClassInfo excClassInfo) {
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+            for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo classInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (classInfo == null) {
                 continue;  // New class
             }
@@ -515,15 +486,13 @@ public class RefClassFinder {
      * classes referencing given class X via the "X.class" construct.
      */
     public void findClassesDeclaringField(String name, String signature, boolean isStatic, String packageToLookIn) {
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo classInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (classInfo == null) {
                 continue;  // New class
             }
-            if (packageToLookIn != null && 
+            if (packageToLookIn != null &&
                     !classInfo.packageName.equals(packageToLookIn)) {
                 continue;
             }
@@ -559,12 +528,11 @@ public class RefClassFinder {
      */
     private void findReferencingClasses(ClassInfo classInfo,
             int thorDegree, boolean fromDiffPackages,
-            HashSet<String> ret) {
+            Set<String> ret) {
         String packageName = classInfo.packageName;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -599,11 +567,9 @@ public class RefClassFinder {
             boolean fromDiffPackages, boolean onlySubclasses) {
         String declaringClassName = declaringClassInfo.name;
         String declaringClassPackage = declaringClassInfo.packageName;
-        Enumeration pcdEntries = pcdm.entriesEnum();
-        while (pcdEntries.hasMoreElements()) {
+        for (PCDEntry pcde : pcdm.entries()) {
             ClassInfo clientInfo =
-                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD,
-                    (PCDEntry) pcdEntries.nextElement());
+                    pcdm.getClassInfoForPCDEntry(ClassInfo.VER_OLD, pcde);
             if (clientInfo == null) {
                 continue;  // New class
             }
@@ -614,7 +580,7 @@ public class RefClassFinder {
             if (!memberAccessibleFrom(declaringClassInfo, memberNo, clientInfo, isField)) {
                 continue;
             }
-            if (fromDiffPackages && 
+            if (fromDiffPackages &&
                     declaringClassPackage.equals(clientInfo.packageName)) {
                 continue;
             }

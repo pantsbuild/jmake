@@ -8,11 +8,11 @@ package com.sun.tools.jmake;
 
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A reflection of a class, in the form that allows fast checks and information obtaining.
@@ -20,6 +20,7 @@ import java.util.List;
  * @author Misha Dmitriev
  * @date 5 April 2004
  */
+@SuppressWarnings("serial")
 public class ClassInfo implements Serializable {
 
     public static final int VER_OLD = 0;  // Old version
@@ -154,13 +155,13 @@ public class ClassInfo implements Serializable {
      * class, that belong to the same project.
      */
     public Set<String> getAllImplementedIntfNames() {
-        Set<String> res = new HashSet<String>();
+        Set<String> res = new LinkedHashSet<String>();
         addImplementedInterfaceNames(false, res);
         return res;
     }
 
     /** Add to the given set the names of direct/all interfaces implemented by the given class. */
-    private void addImplementedInterfaceNames(boolean directOnly, 
+    private void addImplementedInterfaceNames(boolean directOnly,
             Set<String> intfSet) {
         if (interfaces != null) {
             for (int i = 0; i < interfaces.length; i++) {
@@ -179,7 +180,7 @@ public class ClassInfo implements Serializable {
             }
         }
 
-        if (directOnly || superName == null || 
+        if (directOnly || superName == null ||
                 "java/lang/Object".equals(superName)) {
             return;
         }
@@ -197,11 +198,9 @@ public class ClassInfo implements Serializable {
             return directSubclasses;
         }
 
-        Enumeration entries = pcdm.entriesEnum();
         List<ClassInfo> listRes = new ArrayList<ClassInfo>();
 
-        while (entries.hasMoreElements()) {
-            PCDEntry entry = (PCDEntry) entries.nextElement();
+        for (PCDEntry entry : pcdm.entries()) {
             ClassInfo classInfo = pcdm.getClassInfoForPCDEntry(verCode, entry);
             if (classInfo == null) {
                 continue;  // New or deleted class, depending on verCode

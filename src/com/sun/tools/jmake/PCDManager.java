@@ -6,25 +6,25 @@
  */
 package com.sun.tools.jmake;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.HashSet;
-import java.util.Enumeration;
-import java.util.Iterator;
-
-import java.util.zip.Adler32;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
-
 import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.FileNotFoundException;
-
-import java.lang.reflect.Method;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.Adler32;
 
 /**
  * This class implements management of the Project Class Directory, automatic tracking
@@ -36,25 +36,25 @@ import java.util.StringTokenizer;
 public class PCDManager {
 
     private PCDContainer pcdc;
-    private Hashtable<String,PCDEntry> pcd;   // Maps project class names to PCDEntries
+    private Map<String,PCDEntry> pcd;   // Maps project class names to PCDEntries
     private String projectJavaAndJarFilesArray[];
     private String addedJavaAndJarFilesArray[],  removedJavaAndJarFilesArray[],  updatedJavaAndJarFilesArray[];
     private List<String> newJavaFiles;
-    private HashSet<String> updatedJavaFiles;
-    private HashSet<String> recompiledJavaFiles;
-    private HashSet<String> updatedClasses;       // This set is emptied on every new internal jmake iteration...
-    private HashSet<String> allUpdatedClasses;    // whereas in this one the names of all updated classes found during this jmake invocation are stored.
-    private HashSet<String> updatedAndCheckedClasses;
-    private HashSet<String> deletedClasses;
-    private HashSet<String> updatedJarFiles;
-    private HashSet<String> stableJarFiles;
-    private HashSet<String> newJarFiles;
-    private HashSet<String> deletedJarFiles;
+    private Set<String> updatedJavaFiles;
+    private Set<String> recompiledJavaFiles;
+    private Set<String> updatedClasses;       // This set is emptied on every new internal jmake iteration...
+    private Set<String> allUpdatedClasses;    // whereas in this one the names of all updated classes found during this jmake invocation are stored.
+    private Set<String> updatedAndCheckedClasses;
+    private Set<String> deletedClasses;
+    private Set<String> updatedJarFiles;
+    private Set<String> stableJarFiles;
+    private Set<String> newJarFiles;
+    private Set<String> deletedJarFiles;
 
     private String destDir;
     private boolean destDirSpecified;
     private List<String> javacAddArgs;
-    private Class compilerClass;
+    private Class<?> compilerClass;
     private Method compileMethod;
     private String jcExecApp;
     private Object externalApp;
@@ -83,7 +83,7 @@ public class PCDManager {
                       boolean noWarnOnDependentJar) {
         this.pcdc = pcdc;
         if (pcdc.pcd == null) {
-            pcd = new Hashtable<String,PCDEntry>();
+            pcd = new LinkedHashMap<String,PCDEntry>();
             pcdc.pcd = pcd;
             newProject = true;
         } else {
@@ -95,16 +95,16 @@ public class PCDManager {
         this.removedJavaAndJarFilesArray = removedJavaAndJarFilesArray;
         this.updatedJavaAndJarFilesArray = updatedJavaAndJarFilesArray;
         newJavaFiles = new ArrayList<String>();
-        updatedJavaFiles = new HashSet<String>();
-        recompiledJavaFiles = new HashSet<String>();
-        updatedAndCheckedClasses = new HashSet<String>();
-        deletedClasses = new HashSet<String>();
-        allUpdatedClasses = new HashSet<String>();
+        updatedJavaFiles = new LinkedHashSet<String>();
+        recompiledJavaFiles = new LinkedHashSet<String>();
+        updatedAndCheckedClasses = new LinkedHashSet<String>();
+        deletedClasses = new LinkedHashSet<String>();
+        allUpdatedClasses = new LinkedHashSet<String>();
 
-        updatedJarFiles = new HashSet<String>();
-        stableJarFiles = new HashSet<String>();
-        newJarFiles = new HashSet<String>();
-        deletedJarFiles = new HashSet<String>();
+        updatedJarFiles = new LinkedHashSet<String>();
+        stableJarFiles = new LinkedHashSet<String>();
+        newJarFiles = new LinkedHashSet<String>();
+        deletedJarFiles = new LinkedHashSet<String>();
 
         initializeDestDir(in_destDir);
         this.javacAddArgs = javacAddArgs;
@@ -115,8 +115,8 @@ public class PCDManager {
         cfr = new ClassFileReader();
     }
 
-    public Enumeration<PCDEntry> entriesEnum() {
-        return pcd.elements();
+    public Collection<PCDEntry> entries() {
+        return pcd.values();
     }
 
     public ClassFileReader getClassFileReader() {
@@ -194,9 +194,7 @@ public class PCDManager {
         PCDEntry pcde = pcd.get(className);
         if (pcde == null) {
             //!!!
-            Enumeration<String> e = pcd.keys();
-            while (e.hasMoreElements()) {
-                String keyName = e.nextElement();
+            for (String keyName : pcd.keySet()) {
                 PCDEntry entry = pcd.get(keyName);
                 if (entry.className.equals(className)) {
                     System.out.println("ERROR: inconsistent entry: key = " +
@@ -269,7 +267,7 @@ public class PCDManager {
             throw compilerInteractionException("error loading compiler main class com.sun.tools.javac.Main", e, 0);
         }
 
-        Class[] args = new Class[]{String[].class};
+        Class<?>[] args = new Class<?>[]{String[].class};
         try {
             compileMethod = compilerClass.getMethod(jcMethod, args);
         } catch (Exception e) {
@@ -292,7 +290,7 @@ public class PCDManager {
         // Let's free some memory
         projectJavaAndJarFilesArray = null;
 
-        updatedClasses = new HashSet<String>();
+        updatedClasses = new LinkedHashSet<String>();
         dealWithClassesInUpdatedJarFiles();
 
         int iterNo = 0;
@@ -331,7 +329,7 @@ public class PCDManager {
             checkUpdatedClasses();
             Utils.stopAndPrintTiming("Check updated classes", Utils.TIMING_CHECK_UPDATED_CLASSES);
 
-            updatedClasses = new HashSet<String>();
+            updatedClasses = new LinkedHashSet<String>();
             if (ClassPath.getVirtualPath() != null) {
                 if (res != 0)
                     break;
@@ -351,8 +349,8 @@ public class PCDManager {
     public String[] getAllUpdatedClassesAsStringArray() {
         String[] res = new String[allUpdatedClasses.size()];
         int i = 0;
-        for (Iterator<String> iter = allUpdatedClasses.iterator(); iter.hasNext();) {
-            res[i++] = iter.next().replace('/', '.');
+        for (String updatedClass : allUpdatedClasses) {
+            res[i++] = updatedClass.replace('/', '.');
         }
         return res;
     }
@@ -371,14 +369,13 @@ public class PCDManager {
      */
     private void synchronizeProjectFilesAndPCD() {
         if (projectJavaAndJarFilesArray != null) {
-            HashSet<String> pcdJavaFilesSet = new HashSet<String>(pcd.size() * 3 / 2);
-            Enumeration<PCDEntry> pcdEntries = entriesEnum();
-            while (pcdEntries.hasMoreElements()) {
-                pcdJavaFilesSet.add(pcdEntries.nextElement().javaFileFullPath);
+            Set<String> pcdJavaFilesSet = new LinkedHashSet<String>(pcd.size() * 3 / 2);
+            for(PCDEntry entry : entries()) {
+                pcdJavaFilesSet.add(entry.javaFileFullPath);
             }
 
-            HashSet<String> canonicalPJF =
-                    new HashSet<String>(projectJavaAndJarFilesArray.length * 3 / 2);
+            Set<String> canonicalPJF =
+                    new LinkedHashSet<String>(projectJavaAndJarFilesArray.length * 3 / 2);
 
             // Add .java files that are not in PCD to newJavaFiles; add .jar files that are not in PCD to newJarFiles.
             for (int i = 0; i < projectJavaAndJarFilesArray.length; i++) {
@@ -412,9 +409,9 @@ public class PCDManager {
             }
 
             // Find the entries containing .java or .jar files that are not in project anymore
-            for (Enumeration keys = pcd.keys(); keys.hasMoreElements();) {
-                String key = (String) keys.nextElement();
-                PCDEntry e = pcd.get(key);
+            for (Entry<String, PCDEntry> entry : pcd.entrySet()) {
+                String key = entry.getKey();
+                PCDEntry e = entry.getValue();
                 e.oldClassInfo.restorePCDM(this);
                 if (!canonicalPJF.contains(e.javaFileFullPath)) {
                     if (ClassPath.getVirtualPath() == null) {
@@ -434,6 +431,8 @@ public class PCDManager {
                             String sourceFound = null;
                             // Find source and class file via virtual path
                             String path = ClassPath.getVirtualPath();
+                            // TODO(Eric Ayers): IntelliJ static analysis shows several useless
+                            // expressions that make this loop a no-op.
                             for (StringTokenizer st = new StringTokenizer(path, File.pathSeparator);
                                 !(classFound != null && sourceFound != null) && st.hasMoreTokens();)
                             {
@@ -447,6 +446,8 @@ public class PCDManager {
                                     classFound = fullPath + ".class";
                                 }
                             }
+                            // TODO(Eric Ayers): IntelliJ static analysis shows that this expression
+                            // is always true.
                             if (classFound == null)
                             {
                                 deletedClasses.add(key);
@@ -483,23 +484,24 @@ public class PCDManager {
             }
         } else { // projectJavaAndJarFilesArray == null - use supplied arrays of added and removed .java and .jar files
             if (addedJavaAndJarFilesArray != null) {
-                for (int i = 0; i < addedJavaAndJarFilesArray.length; i++) {
-                    String fileName = addedJavaAndJarFilesArray[i].intern();
+                for (String fileName : addedJavaAndJarFilesArray) {
+                    fileName = fileName.intern();
                     if (fileName.endsWith(".java")) {
                         newJavaFiles.add(fileName);
                     } else if (fileName.endsWith(".jar")) {
                         newJarFiles.add(fileName);
                     } else {
-                        throw new PrivateException(new PublicExceptions.InvalidSourceFileExtensionException("specified source file " + fileName + " has an invalid extension (not .java or .jar)."));
+                        throw new PrivateException(new PublicExceptions.InvalidSourceFileExtensionException(
+                            "specified source file " + fileName + " has an invalid extension (not .java or .jar)."));
                     }
                 }
             }
 
-            HashSet<String> removedJavaAndJarFilesSet = null;
+            Set<String> removedJavaAndJarFilesSet = null;
             if (removedJavaAndJarFilesArray != null) {
-                removedJavaAndJarFilesSet = new HashSet<String>();
-                for (int i = 0; i < removedJavaAndJarFilesArray.length; i++) {
-                    String fileName = removedJavaAndJarFilesArray[i].intern();
+                removedJavaAndJarFilesSet = new LinkedHashSet<String>();
+                for (String fileName : removedJavaAndJarFilesArray) {
+                    fileName = fileName.intern();
                     removedJavaAndJarFilesSet.add(fileName);
                     if (fileName.endsWith(".jar")) {
                         deletedJarFiles.add(fileName);
@@ -507,9 +509,9 @@ public class PCDManager {
                 }
             }
 
-            for (Enumeration keys = pcd.keys(); keys.hasMoreElements();) {
-                String key = (String) keys.nextElement();
-                PCDEntry e = pcd.get(key);
+            for (Entry<String, PCDEntry> entry : pcd.entrySet()) {
+                String key = entry.getKey();
+                PCDEntry e = entry.getValue();
                 e.oldClassInfo.restorePCDM(this);
                 if (removedJavaAndJarFilesSet != null &&
                         removedJavaAndJarFilesSet.contains(e.javaFileFullPath)) {
@@ -541,8 +543,8 @@ public class PCDManager {
         // better by immediately marking enclosing classes incompatible once we detect that a deleted nested class is
         // really referenced from somewhere, but the solution below seems to be more robust.
         if (compilationResult != 0) {
-            for (Iterator<String> iter = updatedAndCheckedClasses.iterator(); iter.hasNext();) {
-                PCDEntry entry = pcd.get(iter.next());
+            for (String className : updatedAndCheckedClasses) {
+                PCDEntry entry = pcd.get(className);
                 if (entry.checkResult == PCDEntry.CV_DELETED &&
                         !"".equals(entry.oldClassInfo.directlyEnclosingClass)) {
                     PCDEntry enclEntry =
@@ -552,9 +554,8 @@ public class PCDManager {
             }
         }
 
-        for (Iterator iter = updatedAndCheckedClasses.iterator(); iter.hasNext();) {
-            String className = (String) iter.next();
-            PCDEntry entry = (PCDEntry) pcd.get(className);
+        for (String className : updatedAndCheckedClasses) {
+            PCDEntry entry = pcd.get(className);
             if (entry.checkResult == PCDEntry.CV_UNCHECKED) {
                 continue;
             }
@@ -595,8 +596,7 @@ public class PCDManager {
     private void findUpdatedJavaAndJarFiles() {
         boolean projectSpecifiedAsAllSources =
                 projectJavaAndJarFilesArray != null;
-        for (Enumeration entries = entriesEnum(); entries.hasMoreElements();) {
-            PCDEntry entry = (PCDEntry) entries.nextElement();
+        for (PCDEntry entry : entries()) {
             if (deletedClasses.contains(entry.className)) {
                 continue;
             }
@@ -712,7 +712,7 @@ public class PCDManager {
             args[pos++] = jcExecApp;
         }
         for (int i = 0; i < addArgsNo; i++) {
-            args[pos++] = (String) javacAddArgs.get(i);
+            args[pos++] = javacAddArgs.get(i);
         }
         args[pos++] = "-classpath";
         args[pos++] = ClassPath.getCompilerUserClassPath();
@@ -727,8 +727,7 @@ public class PCDManager {
         if (!newProject) {
             Utils.printInfoMessage("Recompiling source files:");
         }
-        for (Iterator iter = updatedJavaFiles.iterator(); iter.hasNext();) {
-            String javaFileFullPath = (String) iter.next();
+        for (String javaFileFullPath : updatedJavaFiles) {
             if (!newProject) {
                 Utils.printInfoMessage(javaFileFullPath);
             }
@@ -787,8 +786,8 @@ public class PCDManager {
         int filesNo = updatedJavaFiles.size() + newJavaFiles.size();
         String[] fileNames = new String[filesNo];
         int i = 0;
-        for (Iterator<String> iter = updatedJavaFiles.iterator(); iter.hasNext(); i++) {
-            recompiledJavaFiles.add(fileNames[i] = iter.next());
+        for (String updatedFile : updatedJavaFiles) {
+            recompiledJavaFiles.add(fileNames[i] = updatedFile);
         }
         for (int j = 0; j < newJavaFiles.size(); j++) {
             recompiledJavaFiles.add(fileNames[i++] = newJavaFiles.get(j));
@@ -814,8 +813,7 @@ public class PCDManager {
      * files in that archive and put info on them into the PCD.
      */
     private void findClassFilesForNewJavaAndJarFiles() {
-        for (int i = 0; i < newJavaFiles.size(); i++) {
-            String javaFileFullPath = newJavaFiles.get(i);
+        for (String javaFileFullPath : newJavaFiles) {
             PCDEntry pcde =
                     findClassFileOnFilesystem(javaFileFullPath, null, null);
 
@@ -835,8 +833,7 @@ public class PCDManager {
             }
         }
 
-        for (Iterator<String> iter = newJarFiles.iterator(); iter.hasNext();) {
-            String newJarFile = iter.next();
+        for (String newJarFile : newJarFiles) {
             processAllClassesFromJarFile(newJarFile);
         }
     }
@@ -878,7 +875,8 @@ public class PCDManager {
                         if (cutIndex == -1) {
                             // Most probably, there was an error during compilation of this file.
                             // This does not prevent us from continuing.
-                            Utils.printWarningMessage("Warning: unable to find .class file corresponding to source " + javaFileFullPath);
+                            Utils.printWarningMessage("Warning: unable to find .class file corresponding to source " + javaFileFullPath + ": expected " + classFileFullPath);
+
                             return null;
                         }
                         fullClassName = fullClassName.substring(cutIndex + 1);
@@ -950,7 +948,7 @@ public class PCDManager {
         long classFileFP = computeFP(classFileBytes);
 
         if (pcd.containsKey(fullClassName)) {
-            PCDEntry pcde = (PCDEntry) pcd.get(fullClassName);
+            PCDEntry pcde = pcd.get(fullClassName);
             // If this entry has already been checked, it's a second entry for the same class, which is illegal.
             if (pcde.checkResult == PCDEntry.CV_NEWER_FOUND_NEARER) {
                 // Newer copy of same file found in closer layer
@@ -1004,7 +1002,7 @@ public class PCDManager {
         boolean isJavaSourceFile = javaFileFullPath.endsWith(".java");
 
         for (int i = 0; i < nestedClasses.length; i++) {
-            PCDEntry nestedPCDE = (PCDEntry) pcd.get(nestedClasses[i]);
+            PCDEntry nestedPCDE = pcd.get(nestedClasses[i]);
             if (nestedPCDE == null) {
                 if (isJavaSourceFile) {
                     nestedPCDE =
@@ -1054,8 +1052,7 @@ public class PCDManager {
         // That's because we can then find new nested classes, which we will need to add to the PCD, which
         // may probably conflict with us still iterating over it.
         List<PCDEntry> updatedEntries = new ArrayList<PCDEntry>();
-        for (Enumeration entries = entriesEnum(); entries.hasMoreElements();) {
-            PCDEntry pcde = (PCDEntry) entries.nextElement();
+        for (PCDEntry pcde : entries()) {
             if (pcde.checkResult == PCDEntry.CV_NEW) {
                 continue;  // This class has just been added to the PCD
             }
@@ -1106,15 +1103,12 @@ public class PCDManager {
     }
 
     private void findUpdatedClasses() {
-        Enumeration entries = entriesEnum();
-        PCDEntry entry;
         // This (iterating over all of the classes once again after performing that in classFileObsoleteOrDeleted()) may
         // seem time-consuming, but in reality it isn't, since the most time-consuming operation of obtaining internal
         // file handles for class files has already been performed in classFileObsoleteOrDeleted(). Once we have done that,
         // this re-iteration takes very small amount of time. However, if we switch from "class file older than .java
         // file" to ".java file timestamp changed" condition for recompilation, this will have to be changed as well.
-        while (entries.hasMoreElements()) {
-            entry = (PCDEntry) entries.nextElement();
+         for (PCDEntry entry : entries()) {
             String className = entry.className;
             if (updatedAndCheckedClasses.contains(className) ||
                     deletedClasses.contains(className)) {
@@ -1165,8 +1159,7 @@ public class PCDManager {
      * potentially affected dependent classes.
      */
     private void checkUpdatedClasses() {
-        for (Iterator<String> iter = updatedClasses.iterator(); iter.hasNext();) {
-            String className = iter.next();
+        for (String className : updatedClasses) {
             PCDEntry pcde = pcd.get(className);
             getClassInfoForPCDEntry(ClassInfo.VER_NEW, pcde);
             if (!"".equals(pcde.oldClassInfo.directlyEnclosingClass)) {
@@ -1208,8 +1201,7 @@ public class PCDManager {
                 String affectedClasses[] = cv.getAffectedClasses();
                 if (affectedClasses != null) {
                     for (int i = 0; i < affectedClasses.length; i++) {
-                        PCDEntry affEntry =
-                                (PCDEntry) pcd.get(affectedClasses[i]);
+                        PCDEntry affEntry = pcd.get(affectedClasses[i]);
                         updatedJavaFiles.add(affEntry.javaFileFullPath);
                     }
                 }
@@ -1229,8 +1221,7 @@ public class PCDManager {
 
     /** Find all dependent classes for deleted classes. */
     private void checkDeletedClasses() {
-        for (Iterator<String> iter = deletedClasses.iterator(); iter.hasNext();) {
-            String className = iter.next();
+        for (String className : deletedClasses) {
             PCDEntry pcde = pcd.get(className);
 
             if (pcde == null) {  // "Safety net" for the (hopefully unlikely) case. I observed it just once and couldn't identify the reason
@@ -1247,8 +1238,7 @@ public class PCDManager {
                 String[] affectedClasses = cv.getAffectedClasses();
                 if (affectedClasses != null) {
                     for (int i = 0; i < affectedClasses.length; i++) {
-                        PCDEntry affEntry =
-                                (PCDEntry) pcd.get(affectedClasses[i]);
+                        PCDEntry affEntry = pcd.get(affectedClasses[i]);
                         if (deletedClasses.contains(affEntry.className)) {
                             continue;
                         }
@@ -1281,8 +1271,8 @@ public class PCDManager {
         List<PCDEntry> updatedEntries = new ArrayList<PCDEntry>();
         List<PCDEntry> movedEntries = new ArrayList<PCDEntry>();
 
-        for (Enumeration entries = jarFile.entries(); entries.hasMoreElements();) {
-            JarEntry jarEntry = (JarEntry) entries.nextElement();
+        for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
+            JarEntry jarEntry = entries.nextElement();
             String fullClassName = jarEntry.getName();
             if (!fullClassName.endsWith(".class")) {
                 continue;
@@ -1293,7 +1283,7 @@ public class PCDManager {
             classFileBytes = Utils.readZipEntryIntoBuffer(jarFile, jarEntry);
             long classFileFP = computeFP(classFileBytes);
 
-            PCDEntry pcde = (PCDEntry) pcd.get(fullClassName);
+            PCDEntry pcde = pcd.get(fullClassName);
             if (pcde != null) {
                 if (pcde.checked) {
                     throw new PrivateException(new PublicExceptions.DoubleEntryException(
@@ -1364,13 +1354,12 @@ public class PCDManager {
             return;
         }
 
-        for (Iterator iter = updatedJarFiles.iterator(); iter.hasNext();) {
-            processAllClassesFromJarFile((String) iter.next());
+        for (String updatedJarFile : updatedJarFiles) {
+            processAllClassesFromJarFile(updatedJarFile);
         }
 
         // Now scan the PCD to check which classes that come from updated .jar files have not been marked as checked
-        for (Enumeration elements = pcd.elements(); elements.hasMoreElements();) {
-            PCDEntry pcde = (PCDEntry) elements.nextElement();
+        for (PCDEntry pcde : entries()) {
             if (updatedJarFiles.contains(pcde.javaFileFullPath)) {
                 if (!pcde.checked) {
                     deletedClasses.add(pcde.className);

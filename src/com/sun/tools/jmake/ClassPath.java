@@ -7,22 +7,20 @@
 package com.sun.tools.jmake;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FilenameFilter;
-
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.Collection;
-import java.util.Set;
-import java.util.Hashtable;
-
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * An instance of this class represents a class path, on which binary classes can be looked up.
@@ -50,7 +48,7 @@ public class ClassPath {
     // setClassPath() and setProjectClassPath() methods.
     private static String standardClassPathStr,  projectClassPathStr,  bootClassPathStr,  extDirsStr,
             virtualPathStr;
-    private static Hashtable<String,ClassInfo> classCache;
+    private static Map<String,ClassInfo> classCache;
 
 
     static {
@@ -68,7 +66,7 @@ public class ClassPath {
         compilerUserClassPath = null;
         standardClassPathStr = projectClassPathStr = bootClassPathStr =
                 extDirsStr = virtualPathStr = null;
-        classCache = new Hashtable<String,ClassInfo>();
+        classCache = new LinkedHashMap<String,ClassInfo>();
     }
 
     public static void setClassPath(String value) throws PublicExceptions.InvalidCmdOptionException {
@@ -202,7 +200,7 @@ public class ClassPath {
      * will recompile everything when they switch to a new JDK version. The optimization prevents us from wasting time
      * repeatedly loading the same sets of core classes.
      */
-    public static void getSuperclasses(String className, 
+    public static void getSuperclasses(String className,
             Collection<String> res, PCDManager pcdm) {
         int iterNo = 0;
         while (!"java/lang/Object".equals(className)) {
@@ -222,7 +220,7 @@ public class ClassPath {
      * projectClassPath or standardClassPath, plus the first interface on each branch that can be loaded from
      * coreClassPath. It's the same optimization as in getSuperclasses().
      */
-    public static void addAllImplementedInterfaceNames(String className, 
+    public static void addAllImplementedInterfaceNames(String className,
             Set<String> intfSet, PCDManager pcdm) {
         if ("java/lang/Object".equals(className)) {
             return;
