@@ -6,11 +6,9 @@
  */
 package com.sun.tools.jmake;
 
-import java.io.IOException;
 import java.io.File;
-import java.io.FileOutputStream;
-
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This class is a persistent container for the Project Class Directory, that can
@@ -21,13 +19,13 @@ import java.util.Hashtable;
  */
 public class PCDContainer {
 
-    /** The data structure (currently Hashtable) for PCD, that maps class name to
+    /** The data structure (currently {@link LinkedHashMap}) for PCD, that maps class name to
     record containing information about the class */
-    Hashtable<String,PCDEntry> pcd;
+    Map<String,PCDEntry> pcd;
     String storeName;
     boolean textFormat;
 
-    private PCDContainer(Hashtable<String,PCDEntry> pcd, String storeName, boolean textFormat) {
+    private PCDContainer(Map<String,PCDEntry> pcd, String storeName, boolean textFormat) {
         this.storeName = storeName;
         this.pcd = pcd;
         this.textFormat = textFormat;
@@ -40,7 +38,7 @@ public class PCDContainer {
         File storeFile = Utils.checkFileForName(storeName);
         if (storeFile != null) {
             Utils.printInfoMessageNoEOL("Opening project database...  ");
-            Hashtable<String,PCDEntry> pcd;
+            Map<String,PCDEntry> pcd;
             if (textFormat) {
                 pcd = new TextProjectDatabaseReader().readProjectDatabaseFromFile(storeFile);
             } else {

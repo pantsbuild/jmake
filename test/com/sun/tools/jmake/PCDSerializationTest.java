@@ -1,14 +1,15 @@
 package com.sun.tools.jmake;
 
-import org.junit.Test;
-
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class PCDSerializationTest {
@@ -39,7 +40,7 @@ public class PCDSerializationTest {
             { "[C", "[java/lang/Class" }
         };
         String[] expectedMungedDeps = { "java/lang/Object", "java/lang/Class" };
-        Hashtable<String,PCDEntry> pcds = new Hashtable<String,PCDEntry>();
+        Map<String,PCDEntry> pcds = new LinkedHashMap<String,PCDEntry>();
         addDeps(pcds, "foo/bar/Baz", testDeps[0]);
         addDeps(pcds, "foo/bar/Baz$", testDeps[1]);
 
@@ -52,17 +53,17 @@ public class PCDSerializationTest {
         String src = deps[0];
         assertEquals("/root/foo/bar/Baz.java", src);
 
-        Set<String> expectedMungedDepsSet = new HashSet<String>();
+        Set<String> expectedMungedDepsSet = new LinkedHashSet<String>();
         Collections.addAll(expectedMungedDepsSet, expectedMungedDeps);
 
-        Set<String> actualMungedDepsSet = new HashSet<String>();
+        Set<String> actualMungedDepsSet = new LinkedHashSet<String>();
         for (int i = 1; i < deps.length; i++) {
             actualMungedDepsSet.add(deps[i]);
         }
         assertEquals(expectedMungedDepsSet, actualMungedDepsSet);
     }
 
-    private void addDeps(Hashtable<String,PCDEntry> pcds, String cls, String[] deps) {
+    private void addDeps(Map<String,PCDEntry> pcds, String cls, String[] deps) {
         ClassInfo ci = new ClassInfo();
         ci.cpoolRefsToClasses = deps;
         pcds.put(cls, new PCDEntry(cls, "/root/foo/bar/Baz.java", 0, 0, ci));

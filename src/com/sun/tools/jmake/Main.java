@@ -6,17 +6,15 @@
  */
 package com.sun.tools.jmake;
 
-import java.util.ArrayList;
-
-import java.io.PrintStream;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.FileReader;
 import java.io.BufferedReader;
-import java.io.StreamTokenizer;
 import java.io.FileNotFoundException;
-
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.io.StreamTokenizer;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +32,7 @@ import java.util.List;
 public class Main {
 
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
-    static final String VERSION = "1.3.8-3";
+    static final String VERSION = "1.3.8-4";
     private String pdbFileName = null;
     private List<String> allProjectJavaFileNamesList =
             new ArrayList<String>(100);
@@ -261,7 +259,7 @@ public class Main {
             st.commentChar('#');
             st.quoteChar('"');
             st.quoteChar('\'');
-            while (st.nextToken() != st.TT_EOF) {
+            while (st.nextToken() != StreamTokenizer.TT_EOF) {
                 argsV.add(st.sval);
             }
             r.close();

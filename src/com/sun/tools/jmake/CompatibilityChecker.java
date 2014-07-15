@@ -7,10 +7,8 @@
 package com.sun.tools.jmake;
 
 import java.lang.reflect.Modifier;
-
-import java.util.Set;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class implements checking of source compatibility of classes and supporting operations
@@ -170,11 +168,10 @@ public class CompatibilityChecker {
     }
 
     private void checkImplementedInterfaces() {
-        Set oldIntfNames = oldClassInfo.getAllImplementedIntfNames();
-        Set newIntfNames = newClassInfo.getAllImplementedIntfNames();
+        Set<String> oldIntfNames = oldClassInfo.getAllImplementedIntfNames();
+        Set<String> newIntfNames = newClassInfo.getAllImplementedIntfNames();
 
-        for (Iterator oldIntfIter = oldIntfNames.iterator(); oldIntfIter.hasNext();) {
-            String oldIntfName = (String) oldIntfIter.next();
+        for (String oldIntfName : oldIntfNames) {
             if (!newIntfNames.contains(oldIntfName)) {
                 versionsCompatible = false;
                 ClassInfo missingSuperInterface =
@@ -192,8 +189,7 @@ public class CompatibilityChecker {
 
         // Check if the class is abstract, and an interface has been added to its list of implemented interfaces
         if (newClassInfo.isAbstract()) {
-            for (Iterator newIntfIter = newIntfNames.iterator(); newIntfIter.hasNext();) {
-                String newIntfName = (String) newIntfIter.next();
+            for (String newIntfName : newIntfNames) {
                 if (!oldIntfNames.contains(newIntfName)) {
                     versionsCompatible = false;
                     rf.findConcreteSubclasses(oldClassInfo);
@@ -485,7 +481,7 @@ public class CompatibilityChecker {
                     // Check if the new method overloads an existing (declared or inherited) method. Overloading test is rough -
                     // we just check if the number of parameters is the same. Note that if a new constructor has been added, it
                     // can be treated in the same way, except that we shouldn't look up "same name methods" for it in superclasses.
-                    oldClassInfo.findExistingSameNameMethods(newMName, 
+                    oldClassInfo.findExistingSameNameMethods(newMName,
                             !newMName.equals("<init>"), false,
                             new ClassInfo.MethodHandler() {
 

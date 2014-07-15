@@ -6,8 +6,17 @@
  */
 package com.sun.tools.jmake;
 
-import java.io.*;
-import java.util.Hashtable;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +32,7 @@ import java.util.regex.Pattern;
  * @date 13 January 2013
  */
 public class TextProjectDatabaseReader {
-    public Hashtable<String,PCDEntry> readProjectDatabaseFromFile(File infile) {
+    public Map<String,PCDEntry> readProjectDatabaseFromFile(File infile) {
         try {
             BufferedReader in =
                 new BufferedReader(new InputStreamReader(new FileInputStream(infile), "UTF-8"));
@@ -41,8 +50,8 @@ public class TextProjectDatabaseReader {
         }
     }
 
-    public Hashtable<String,PCDEntry> readProjectDatabase(BufferedReader in) {
-        Hashtable<String,PCDEntry> pcd;
+    public Map<String,PCDEntry> readProjectDatabase(BufferedReader in) {
+        Map<String,PCDEntry> pcd;
         try {
             String line = in.readLine();
             if (!"pcd entries:".equals(line))
@@ -52,7 +61,7 @@ public class TextProjectDatabaseReader {
             if (!m.matches())
                 throw error("Expected: '<n> items', got: " + line);
             int numEntries = Integer.parseInt(m.group(1));
-            pcd = new Hashtable<String, PCDEntry>(numEntries);
+            pcd = new LinkedHashMap<String, PCDEntry>(numEntries);
             for (int i = 0; i < numEntries; i++) {
                 line = in.readLine();
                 if (line == null)
