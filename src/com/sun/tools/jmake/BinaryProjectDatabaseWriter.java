@@ -9,8 +9,7 @@ package com.sun.tools.jmake;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * This class implements writing into a byte array representing a project database
@@ -20,13 +19,13 @@ import java.util.Enumeration;
  */
 public class BinaryProjectDatabaseWriter extends BinaryFileWriter {
 
-    private Hashtable pcd = null;
+    private Map<String, PCDEntry> pcd = null;
     private int nOfEntries;
     private byte[] stringBuf;
     private int curStringBufPos,  stringBufInc,  curStringBufWatermark,  stringCount;
     private StringHashTable stringHashTable = null;
 
-    public void writeProjectDatabaseToFile(File outfile, Hashtable pcd) {
+    public void writeProjectDatabaseToFile(File outfile, Map<String, PCDEntry> pcd) {
         try {
             byte[] buf = new BinaryProjectDatabaseWriter().writeProjectDatabase(pcd);
             FileOutputStream out = new FileOutputStream(outfile);
@@ -37,7 +36,7 @@ public class BinaryProjectDatabaseWriter extends BinaryFileWriter {
         }
     }
 
-    public byte[] writeProjectDatabase(Hashtable pcd) {
+    public byte[] writeProjectDatabase(Map<String, PCDEntry> pcd) {
         this.pcd = pcd;
         nOfEntries = pcd.size();
 
@@ -49,9 +48,7 @@ public class BinaryProjectDatabaseWriter extends BinaryFileWriter {
         curStringBufWatermark = stringBuf.length - 20;
         stringHashTable = new StringHashTable(stringBuf.length / 8);
 
-        Enumeration entries = pcd.elements();
-        while (entries.hasMoreElements()) {
-            PCDEntry entry = (PCDEntry) entries.nextElement();
+        for (PCDEntry entry : pcd.values()) {
             writePCDEntry(entry);
         }
 

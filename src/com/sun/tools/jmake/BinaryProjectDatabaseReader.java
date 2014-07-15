@@ -7,35 +7,35 @@
 package com.sun.tools.jmake;
 
 import java.io.File;
-import java.util.Hashtable;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This class creates the internal representation of the project database from a byte array.
- * 
+ *
  * @author  Misha Dmitriev
  * @date 2 March 2005
  */
 public class BinaryProjectDatabaseReader extends BinaryFileReader {
 
     private String stringTable[];
-    private Hashtable<String,PCDEntry> pcd;
+    private Map<String,PCDEntry> pcd;
     private int nOfEntries;
     private int pdbFormat;  // Currently supported values: 0x01030300 (jmake 1.3.3 and newer versions); 1 (all older versions)
     // These are defined in Utils as PDB_FORMAT_CODE_LATEST and PDB_FORMAT_CODE_OLD
 
-    public Hashtable<String,PCDEntry> readProjectDatabaseFromFile(File infile) {
+    public Map<String,PCDEntry> readProjectDatabaseFromFile(File infile) {
         byte buf[] = Utils.readFileIntoBuffer(infile);
         return readProjectDatabase(buf, infile.toString());
     }
 
-    public Hashtable<String,PCDEntry> readProjectDatabase(byte[] pdbFile,
+    public Map<String,PCDEntry> readProjectDatabase(byte[] pdbFile,
             String pdbFileFullPath) {
         initBuf(pdbFile, pdbFileFullPath);
 
         readPreamble();
         readStringTable();
-        pcd = new Hashtable<String,PCDEntry>(nOfEntries * 4 / 3);
+        pcd = new LinkedHashMap<String,PCDEntry>(nOfEntries * 4 / 3);
 
         for (int i = 0; i < nOfEntries; i++) {
             PCDEntry entry = readPCDEntry();

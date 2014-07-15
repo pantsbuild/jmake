@@ -6,8 +6,21 @@
  */
 package com.sun.tools.jmake;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -19,13 +32,13 @@ import java.util.*;
  * @date 13 January 2013
  */
 public class TextProjectDatabaseWriter {
-    private static Set<String> primitives = new HashSet<String>(
+    private static Set<String> primitives = new LinkedHashSet<String>(
         Arrays.asList("boolean", "byte", "char", "double", "float", "int", "long", "short",
                       "Z", "B", "C", "D", "F", "I", "J", "S"));
 
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();  // Reusable temp buffer.
 
-    public void writeProjectDatabaseToFile(File outfile, Hashtable<String, PCDEntry> pcd) {
+    public void writeProjectDatabaseToFile(File outfile, Map<String, PCDEntry> pcd) {
         try {
             Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outfile), "UTF-8"));
             try {
@@ -42,19 +55,17 @@ public class TextProjectDatabaseWriter {
         }
     }
 
-	public void writeProjectDatabase(Writer out, Hashtable<String,PCDEntry> pcd) {
+	public void writeProjectDatabase(Writer out, Map<String,PCDEntry> pcd) {
         try {
             out.write("pcd entries:\n");
             out.write(Integer.toString(pcd.size()));
             out.write(" items\n");
-            Map<String, Set<String>> depsBySource = new HashMap<String, Set<String>>();
-            Enumeration<PCDEntry> entries = pcd.elements();
-            while (entries.hasMoreElements()) {
-                PCDEntry entry = entries.nextElement();
+            Map<String, Set<String>> depsBySource = new LinkedHashMap<String, Set<String>>();
+            for (PCDEntry entry : pcd.values()) {
                 writePCDEntry(out, entry);
                 Set<String> deps = depsBySource.get(entry.javaFileFullPath);
                 if (deps == null) {
-                    deps = new HashSet<String>();
+                    deps = new LinkedHashSet<String>();
                     depsBySource.put(entry.javaFileFullPath, deps);
                 }
                 addDepsFromClassInfo(deps, entry.oldClassInfo);

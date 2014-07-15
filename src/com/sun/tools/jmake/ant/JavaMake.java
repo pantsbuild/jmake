@@ -191,11 +191,13 @@ public class JavaMake extends Javac {
         File destDir = getDestdir();
 
         // Create a method object for method "compileSourceFiles" to call back
-        Class thisClass = this.getClass();
+        Class<?> thisClass = this.getClass();
         Method compileSourceFilesMethod;
         try {
-            compileSourceFilesMethod = thisClass.getDeclaredMethod(
-                    "compileSourceFiles", new Class[]{String[].class});
+          Class<?>[] args = new Class<?>[]{String[].class};
+
+          compileSourceFilesMethod = thisClass.getDeclaredMethod(
+                    "compileSourceFiles", args);
         } catch (Exception e) {
             throw new BuildException(e.getMessage() + "\n Should not happen!");
         }
@@ -212,11 +214,11 @@ public class JavaMake extends Javac {
         try {
             Path compilePath = getClasspath();
             if (compilePath != null) {
-                jmake.setClassPath(compilePath.toString());
+                Main.setClassPath(compilePath.toString());
             }
             Path path = getProjClasspath();
             if (path != null) {
-                jmake.setProjectClassPath(path.toString());
+                Main.setProjectClassPath(path.toString());
             }
             if (compilePath == null) {
                 compilePath = path;
@@ -226,11 +228,11 @@ public class JavaMake extends Javac {
             setClasspath(compilePath);
             path = getBootclasspath();
             if (path != null) {
-                jmake.setBootClassPath(path.toString());
+                Main.setBootClassPath(path.toString());
             }
             path = getExtdirs();
             if (path != null) {
-                jmake.setExtDirs(path.toString());
+                Main.setExtDirs(path.toString());
             }
         } catch (Exception e) {
             /* Should not happen - Ant has already checked paths */
@@ -244,7 +246,7 @@ public class JavaMake extends Javac {
         // Initialize (or re-initialize) jmake's internal "out" and "err" stream variables - important
         // in situations when e.g. an IDE that launches the Ant script may redefine System.out and System.err
         // in between Ant invocations
-        jmake.setOutputStreams(System.out, System.out, System.err);
+        Main.setOutputStreams(System.out, System.out, System.err);
 
         int res =
                 jmake.mainExternalControlled(
