@@ -6,6 +6,8 @@
  */
 package com.sun.tools.jmake;
 
+import java.io.File;
+
 /**
  * An instance of this class represents an entry in the Project Class Directory.
  *
@@ -74,5 +76,33 @@ public class PCDEntry {
         return "className = " + className +
                 "; classFileFullPath = " + classFileFullPath +
                 "; javaFileFullPath = " + javaFileFullPath;
+    }
+
+    /** 
+     * Returns the name of the class that corresponds to the file name, i.e. the public class
+     */
+    private String getExpectedClassName() {
+        File path = new File(javaFileFullPath);
+        int index = -1;
+        do {
+            index = className.indexOf('/', index + 1);
+            path = path.getParentFile();
+        } while (index != -1);
+        // It is assumed that the javaFileFillPath ends with .java
+        int javaPathWithoutSuffix = javaFileFullPath.length() - 5;
+        return javaFileFullPath.substring(path.toString().length(),
+                                            javaPathWithoutSuffix);
+    }
+
+    /**
+     * A class that neither has the same name as the java file, nor an inner class, is
+     * package-private.
+     */
+    public boolean isPackagePrivateClass() {
+        String expectedClassName = getExpectedClassName();
+
+        return !className.equals(expectedClassName)
+            || (className.startsWith(expectedClassName)
+                && className.charAt(expectedClassName.length()) != '$');
     }
 }
