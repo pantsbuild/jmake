@@ -6,15 +6,22 @@
  */
 package com.sun.tools.jmake;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -50,6 +57,8 @@ public class PCDManager {
     private Set<String> stableJarFiles;
     private Set<String> newJarFiles;
     private Set<String> deletedJarFiles;
+    /* Dependencies from the dependencyFile, if any */
+    private Map<String, List<String>> extraDependencies;
 
     private String destDir;
     private boolean destDirSpecified;
@@ -63,6 +72,7 @@ public class PCDManager {
     private CompatibilityChecker cv;
     private ClassFileReader cfr;
     private boolean newProject = false;
+    private String dependencyFile = null;
     private static boolean backSlashFileSeparator = File.separatorChar != '/';
 
     /**** Interface to the class ****/
@@ -80,7 +90,8 @@ public class PCDManager {
                       String in_destDir,
                       List<String> javacAddArgs,
                       boolean failOnDependentJar,
-                      boolean noWarnOnDependentJar) {
+                      boolean noWarnOnDependentJar,
+                      String dependencyFile) {
         this.pcdc = pcdc;
         if (pcdc.pcd == null) {
             pcd = new LinkedHashMap<String,PCDEntry>();
@@ -94,6 +105,7 @@ public class PCDManager {
         this.addedJavaAndJarFilesArray = addedJavaAndJarFilesArray;
         this.removedJavaAndJarFilesArray = removedJavaAndJarFilesArray;
         this.updatedJavaAndJarFilesArray = updatedJavaAndJarFilesArray;
+        this.dependencyFile = dependencyFile;
         newJavaFiles = new ArrayList<String>();
         updatedJavaFiles = new LinkedHashSet<String>();
         recompiledJavaFiles = new LinkedHashSet<String>();
@@ -313,6 +325,7 @@ public class PCDManager {
             // New classes can be added to pdb only if compilation was successful, i.e. the new project version is consistent.
             if (iterNo++ == 0 && res == 0) {
                 findClassFilesForNewJavaAndJarFiles();
+                findClassFilesForUpdatedJavaFiles();
                 dealWithNestedClassesForUpdatedJavaFiles();
             }
             Utils.stopAndPrintTiming("Entering new classes in PDB", Utils.TIMING_PDBUPDATE);
@@ -346,6 +359,40 @@ public class PCDManager {
         }
     }
 
+    /**
+     * Find the newly-created class files for existing java files.
+     */
+    private void findClassFilesForUpdatedJavaFiles() {
+        if (dependencyFile == null)
+            return;
+
+        Set<String> allClasses = new HashSet<String>();
+
+        Map<String, List<String>> dependencies = parseDependencyFile();
+        for (String file : updatedJavaFiles) {
+            List<String> myDeps = dependencies.get(file);
+            if (myDeps != null) {
+                PCDEntry parent = getNamedPCDE(file, dependencies);
+                for (String dependency : myDeps) {
+                    allClasses.add(dependency);
+                    if (pcd.containsKey(dependency))
+                        continue;
+                    findClassFileOnFilesystem(file, parent, dependency, false);
+                }
+            }
+        }
+        for (Map.Entry<String, PCDEntry> entry : pcd.entrySet()) {
+            String cls = entry.getKey();
+            if (!allClasses.contains(cls)) {
+                PCDEntry pcde = entry.getValue();
+                if (updatedJavaFiles.contains(pcde.javaFileFullPath)) {
+                    deletedClasses.add(cls);
+                    pcd.remove(cls);
+                }
+            }
+        }
+    }
+
     public String[] getAllUpdatedClassesAsStringArray() {
         String[] res = new String[allUpdatedClasses.size()];
         int i = 0;
@@ -364,6 +411,10 @@ public class PCDManager {
      * For entries whose .java files are not in the PCD anymore, try to delete .class files. We need to do that before
      * compilation to avoid the situation when a .java file is removed but compilation succeeds because the .class file
      * is still there.
+     *
+     * Unfortunately, we also need to delete all class files for non-nested classes whose names differ from their .java
+     * file name, because we can't tell when they've been removed from their .java files -- but it's only safe to do this
+     * for files that originate from java files that we're compiling this round.
      *
      * Upon return from this method, all of the .java and .jar files in the PCD are known to exist.
      */
@@ -413,7 +464,12 @@ public class PCDManager {
                 String key = entry.getKey();
                 PCDEntry e = entry.getValue();
                 e.oldClassInfo.restorePCDM(this);
-                if (!canonicalPJF.contains(e.javaFileFullPath)) {
+                if (canonicalPJF.contains(e.javaFileFullPath)) {
+                    if (e.isPackagePrivateClass()) {
+                        initializeClassFileFullPath(e);
+                        new File(e.classFileFullPath).delete();
+                    }
+                } else {
                     if (ClassPath.getVirtualPath() == null) {
                         deletedClasses.add(key);
                     } else {
@@ -809,13 +865,14 @@ public class PCDManager {
     /**
      * For each .java file from newJavaFiles, find all of the .class files, the names of which we can
      * logically deduce (a top-level class with the same name, and all of the nested classes),
-     * and put the info on them into the PCD. For each .jar file from newJarFiles, find all of the .class
-     * files in that archive and put info on them into the PCD.
+     * and put the info on them into the PCD. Also include any class files from the dependencyFile, 
+     * if any. For each .jar file from newJarFiles, find all of the .class files in that archive and 
+     * put info on them into the PCD.
      */
     private void findClassFilesForNewJavaAndJarFiles() {
         for (String javaFileFullPath : newJavaFiles) {
             PCDEntry pcde =
-                    findClassFileOnFilesystem(javaFileFullPath, null, null);
+                    findClassFileOnFilesystem(javaFileFullPath, null, null, false);
 
             if (pcde == null) {
                 // .class file not found - possible compilation error
@@ -826,16 +883,80 @@ public class PCDManager {
                             "Could not find class file for " + javaFileFullPath));
                 }
             }
+            Set<String> entries = new HashSet<String>();
             if (pcde.checkResult == PCDEntry.CV_NEW) {  // It's really a new .java file, not a moved one
-                findAndUpdateAllNestedClassesForClass(pcde, false);
+                entries.addAll(findAndUpdateAllNestedClassesForClass(pcde, false));
             } else {
-                findAndUpdateAllNestedClassesForClass(pcde, true);
+                entries.addAll(findAndUpdateAllNestedClassesForClass(pcde, true));
+            }
+            entries.add(pcde.className);
+            if (dependencyFile != null) {
+                Map<String, List<String>> dependencies = parseDependencyFile();
+                List<String> myDeps = dependencies.get(javaFileFullPath);
+                if (myDeps != null) {
+                    for (String dependency : myDeps) {
+                        if (entries.contains(dependency))
+                            continue;
+                        findClassFileOnFilesystem(javaFileFullPath, pcde,
+                                dependency, false);
+                    }
+                }
             }
         }
 
         for (String newJarFile : newJarFiles) {
             processAllClassesFromJarFile(newJarFile);
         }
+    }
+
+    /**
+     * Parse an extra dependency file.  The format of the file is a series of lines,
+     * each consisting of:
+     * SourceFileName.java -> ClassName
+     * (these file names are relative to destDir)
+     */
+    private Map<String, List<String>> parseDependencyFile() {
+        if (!destDirSpecified)
+            throw new RuntimeException("Dependency files require destDir");
+        if (extraDependencies != null)
+            return extraDependencies;
+        BufferedReader in = null;
+        try {
+            extraDependencies = new HashMap<String, List<String>>();
+            in = new BufferedReader(new FileReader("dependencyFile"));
+            int lineNumber = 0;
+            while (true) {
+                lineNumber ++;
+                String line = in.readLine();
+                if (line == null)
+                    break;
+                String[] parts = line.split("->");
+                if (parts.length != 2) {
+                    throw new RuntimeException("Failed to parse line " + lineNumber + " of " + dependencyFile
+                                               + ". Expected {foo.java} -> {classname}.");
+                }
+                String src = parts[0].trim();
+                src = new File(destDir, src).getCanonicalPath();
+                String cls = parts[1].trim();
+                List<String> classes = extraDependencies.get(src);
+                if (classes == null) {
+                    classes = new ArrayList<String>();
+                    extraDependencies.put(src, classes);
+                }
+                cls = cls.substring(0, cls.length() - 6); // strip trailing ".class"
+                classes.add(cls);
+            }
+        } catch (IOException e) {
+            throw new PrivateException(e);
+        } finally {
+            if (in != null)
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+        }
+        return extraDependencies;
     }
 
     /**
@@ -852,10 +973,10 @@ public class PCDManager {
 
     /**
      * Find the .class file for the given javaFileFullPath and create a new PCDEntry for it.
-     * If the last two parameters are null, a top-level class for the given .java file is looked up.
-     * Otherwise, the specified nested class is looked up.
+     * If enclosingClassPCDE is null, the named top-level class for the given .java file is looked up.
+     * Otherwise, the specified class specified by nestedClassFullName is looked up.
      */
-    private PCDEntry findClassFileOnFilesystem(String javaFileFullPath, PCDEntry enclosingClassPCDE, String nestedClassFullName) {
+    private PCDEntry findClassFileOnFilesystem(String javaFileFullPath, PCDEntry enclosingClassPCDE, String nestedClassFullName, boolean isNested) {
         String classFileFullPath = null;
         String fullClassName;
         File classFile = null;
@@ -908,7 +1029,7 @@ public class PCDManager {
         byte classFileBytes[] = Utils.readFileIntoBuffer(classFile);
         ClassInfo classInfo =
                 new ClassInfo(classFileBytes, ClassInfo.VER_NEW, this, classFileFullPath);
-        if (enclosingClassPCDE != null) {
+        if (isNested) {
             if (!classInfo.directlyEnclosingClass.equals(enclosingClassPCDE.newClassInfo.name)) {
                 // Check if the above strings are like A and A$1. If so, there is actually no problem - the correct
                 // answer is A$1. The reason why just A was determined as a directly enclosing class when parsing
@@ -991,11 +1112,12 @@ public class PCDManager {
      * classes anyway - when scanning their .jar. If 'move' parameter is true, it means that this method is called for
      * a class that is not new, but has been moved (and possibly updated).
      */
-    private void findAndUpdateAllNestedClassesForClass(PCDEntry pcde, boolean move) {
+    private Set<String> findAndUpdateAllNestedClassesForClass(PCDEntry pcde, boolean move) {
         ClassInfo classInfo = pcde.newClassInfo;
         if (classInfo.nestedClasses == null) {
-            return;
+            return Collections.emptySet();
         }
+        Set<String> entries = new LinkedHashSet<String>();
         String nestedClasses[] = classInfo.nestedClasses;
         String javaFileFullPath = pcde.javaFileFullPath;
         String enclosingClassFileFullPath = pcde.classFileFullPath;
@@ -1006,7 +1128,7 @@ public class PCDManager {
             if (nestedPCDE == null) {
                 if (isJavaSourceFile) {
                     nestedPCDE =
-                            findClassFileOnFilesystem(null, pcde, nestedClasses[i]);
+                            findClassFileOnFilesystem(null, pcde, nestedClasses[i], true);
                 }
                 // For classes that come from a .jar, pcde should already be there. Otherwise this class just doesn't exist.
                 if (nestedPCDE == null) {
@@ -1035,8 +1157,10 @@ public class PCDManager {
             nestedPCDE.newClassInfo.isNonMemberNestedClass =
                     pcde.newClassInfo.nestedClassNonMember[i];
 
-            findAndUpdateAllNestedClassesForClass(nestedPCDE, move);
+            entries.add(nestedPCDE.className);
+            entries.addAll(findAndUpdateAllNestedClassesForClass(nestedPCDE, move));
         }
+        return entries;
     }
 
     /**
@@ -1061,6 +1185,7 @@ public class PCDManager {
                 ClassInfo newClassInfo =
                         getClassInfoForPCDEntry(ClassInfo.VER_NEW, pcde);
                 if (newClassInfo == null) {
+                    deletedClasses.add(pcde.className);
                     continue; // Class file deleted then not re-created due to a compilation error somewhere.
                 }
                 if (oldClassInfo.nestedClasses != null || newClassInfo.nestedClasses != null) {
@@ -1069,7 +1194,45 @@ public class PCDManager {
             }
         }
 
+        if (dependencyFile != null) {
+            Map<String, List<String>> dependencies = parseDependencyFile();
+            for (String file : updatedJavaFiles) {
+                List<String> myDeps = dependencies.get(file);
+                if (myDeps == null)
+                    continue;
+                PCDEntry pcde = getNamedPCDE(file, dependencies);
+                for (String dependency : myDeps) {
+                    PCDEntry dep = pcd.get(dependency);
+                    if (dep != null)
+                        // This is an existing dep.
+                        continue;
+                    dep = findClassFileOnFilesystem(file, pcde, dependency,  false);
+                    getClassInfoForPCDEntry(ClassInfo.VER_NEW, dep);
+                    if (dep.newClassInfo.nestedClasses != null)
+                        updatedEntries.add(dep);
+                }
+            }
+        }
         dealWithNestedClassesForUpdatedPCDEntries(updatedEntries, false);
+    }
+
+    private PCDEntry getNamedPCDE(String file, Map<String, List<String>> dependencies) {
+        List<String> depsForFile = dependencies.get(file);
+        PCDEntry pcde = null;
+        // Find a non-nested class for this java file for which we already have
+        // a pcde
+        for (String dependency : depsForFile) {
+            if (dependency.indexOf('$') != -1)
+                continue;
+            pcde = pcd.get(dependency);
+            if (pcde != null)
+                break;
+        }
+        if (pcde == null) {
+            throw new PrivateException(new PublicExceptions.InternalException(file
+                    + " was supposed to be an updated file, but there are no PCDEntries for any of its deps"));
+        }
+        return pcde;
     }
 
     private void dealWithNestedClassesForUpdatedPCDEntries(List<PCDEntry> entries, boolean move) {
@@ -1078,7 +1241,7 @@ public class PCDManager {
             ClassInfo oldClassInfo = pcde.oldClassInfo;
             ClassInfo newClassInfo = pcde.newClassInfo;
             if (newClassInfo.nestedClasses != null) {
-                findAndUpdateAllNestedClassesForClass(pcde, move);
+                Set<String> nested = findAndUpdateAllNestedClassesForClass(pcde, move);
                 if (oldClassInfo.nestedClasses != null) {  // Check if any old nested classes don't exist anymore
                     for (int j = 0; j < oldClassInfo.nestedClasses.length; j++) {
                         boolean found = false;
