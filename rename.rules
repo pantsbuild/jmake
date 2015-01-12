@@ -1,0 +1,6 @@
+rule com.sun.tools.jmake.** org.pantsbuild.jmake.@1
+zap testcase1.**
+zap testcase2.**
+zap packageinfo.**
+zap classfilereader.**
+
