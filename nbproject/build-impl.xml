@@ -639,4 +639,14 @@ is divided into following sections:
         <!-- You can override this target in the ../build.xml file. -->
     </target>
     <target depends="init,deps-clean,-do-clean,-post-clean" description="Clean build products." name="clean"/>
+
+    <target description="bundle sources in a jar" name="package-sources">
+      <jar basedir="src" destfile="dist/release/${ant.project.name}-sources.jar"/>
+    </target>
+
+    <target name="package_for_release" depends="jar,javadoc,package-sources">
+      <mkdir dir="dist/release"/>
+      <copy file="${dist.jar}" todir="dist/release/"/>
+      <zip basedir="dist/javadoc" includes="**" destfile="dist/release/${ant.project.name}-javadoc.jar"/>
+    </target>
 </project>

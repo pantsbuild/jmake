@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.pantsbuild</groupId>
+  <artifactId>jmake</artifactId>
+  <packaging>jar</packaging>
+  <version>%VERSION%</version>
+
+  <name>Jmake</name>
+  <description>
+    This is the pantsbuild fork of jmake, which has a few bug-fixes
+    that are unlikely to be accepted upstream.
+  </description>
+  <url>https://www.github.com/pantsbuild/jmake</url>
+  <scm>
+    <connection>scm:git:https://github.com/pantsbuild/jmake.git</connection>
+    <developerConnection>scm:git:git@github.com:pantsbuild/jmake.git</developerConnection>
+    <url>https://github.com/pantsbuild/jmake</url>
+    <tag>%TAG%</tag>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>dturner</id>
+      <name>David Turner</name>
+      <email>dturner@twopensource.com</email>
+      <organization>Twitter</organization>
+      <organizationUrl>https://engineering.twitter.com/opensource</organizationUrl>
+      <roles>
+	<role>developer</role>
+	<role>releaser</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License, Version 2.0</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+</project>
