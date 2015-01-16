@@ -4,7 +4,7 @@
 
 
 function die() {
-    echo "$1"
+    echo "FATAL: $1"
     exit 1
 }
 
@@ -17,7 +17,8 @@ ant package_for_release || die "failed to package"
 version=$(java -jar dist/release/jmake.jar -version 2>/dev/null | cut -d ' ' -f 3)
 
 # Use jarjar to rewrite jar:
-java -jar $JARJAR_JAR process rename.rules dist/release/jmake.jar dist/release/jmake-renamed.jar || die "jarjar failed"
+test -e ${JARJAR_JAR} || die "must have a copy of jarjar.jar installed default \$JARJAR_JAR=${JARJAR_JAR}"
+java -jar ${JARJAR_JAR} process rename.rules dist/release/jmake.jar dist/release/jmake-renamed.jar || die "jarjar failed"
 
 test -n "$version" || die "Could not get version"
 

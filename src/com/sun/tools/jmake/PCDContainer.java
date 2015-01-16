@@ -15,7 +15,7 @@ import java.util.Map;
  * read and write itself from/to disk.
  *
  * @author Misha Dmitriev
- * @date 12 November 2001
+ *  12 November 2001
  */
 public class PCDContainer {
 

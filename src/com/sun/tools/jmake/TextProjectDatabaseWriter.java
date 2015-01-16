@@ -29,7 +29,7 @@ import java.util.Set;
  * @see com.sun.tools.jmake.TextProjectDatabaseReader for details.
  *
  * @author  Benjy Weinberger
- * @date 13 January 2013
+ * 13 January 2013
  */
 public class TextProjectDatabaseWriter {
     private static Set<String> primitives = new LinkedHashSet<String>(

@@ -10,7 +10,7 @@ package com.sun.tools.jmake;
  * Basic operations for writing to a byte array representing a binary file.
  *
  * @author  Misha Dmitriev
- * @date 30 January 2002
+ *  30 January 2002
  */
 public class BinaryFileWriter {
 

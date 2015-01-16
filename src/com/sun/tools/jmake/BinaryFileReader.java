@@ -14,7 +14,7 @@ import java.io.IOException;
  * Basic operations for reading a byte array representing a binary file.
  *
  * @author  Misha Dmitriev
- * @date 10 November 2001
+ *  10 November 2001
  */
 public class BinaryFileReader {
 

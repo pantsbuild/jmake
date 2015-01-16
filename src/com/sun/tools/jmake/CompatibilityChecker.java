@@ -14,7 +14,7 @@ import java.util.Set;
  * This class implements checking of source compatibility of classes and supporting operations
  *
  * @author Misha Dmitriev
- * @date 12 March 2004
+ *  12 March 2004
  */
 public class CompatibilityChecker {
 

@@ -14,7 +14,7 @@ import java.util.Map;
  * This class creates the internal representation of the project database from a byte array.
  *
  * @author  Misha Dmitriev
- * @date 2 March 2005
+ *  2 March 2005
  */
 public class BinaryProjectDatabaseReader extends BinaryFileReader {
 

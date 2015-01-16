@@ -12,7 +12,7 @@ import java.io.File;
  * An instance of this class represents an entry in the Project Class Directory.
  *
  * @author Misha Dmitriev
- * @date 29 March 2002
+ *  29 March 2002
  */
 public class PCDEntry {
     // Class versions compare results

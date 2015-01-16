@@ -18,7 +18,7 @@ import java.util.Set;
  * A reflection of a class, in the form that allows fast checks and information obtaining.
  *
  * @author Misha Dmitriev
- * @date 5 April 2004
+ *  5 April 2004
  */
 @SuppressWarnings("serial")
 public class ClassInfo implements Serializable {
