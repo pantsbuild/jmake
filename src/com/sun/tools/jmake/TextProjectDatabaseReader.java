@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * Scala incremental compiler) and allows Pants to handle both uniformly.
  *
  * @author  Benjy Weinberger
- * @date 13 January 2013
+ * 13 January 2013
  */
 public class TextProjectDatabaseReader {
     public Map<String,PCDEntry> readProjectDatabaseFromFile(File infile) {

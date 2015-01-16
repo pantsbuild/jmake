@@ -13,7 +13,7 @@ import java.lang.reflect.Modifier;
  * This class implements reading a byte array representing a class file and converting it into ClassInfo.
  *
  * @author  Misha Dmitriev
- * @date 2 March 2005
+ *  2 March 2005
  */
 public class ClassFileReader extends BinaryFileReader {
 

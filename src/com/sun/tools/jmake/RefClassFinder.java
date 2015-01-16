@@ -14,7 +14,7 @@ import java.util.Set;
  * This class implements finding classes referencing other classes and members in various ways.
  *
  * @author Misha Dmitriev
- * @date 12 March 2004
+ * 12 March 2004
  */
 public class RefClassFinder {
 
@@ -119,7 +119,7 @@ public class RefClassFinder {
     /**
      * For the given class p.C, find each project class X referencing C, that is not a member of
      * package p and is not a direct or indirect subclass of C's directly enclosing class.
-     * (public -> protected transformation)
+     * (public -&gt; protected transformation)
      */
     public void findDiffPackageAndNotSubReferencingClasses1(ClassInfo classInfo) {
         String packageName = classInfo.packageName;
@@ -143,7 +143,7 @@ public class RefClassFinder {
     /**
      * For class p.C, find each project class X referencing C, whose top level enclosing
      * class is different from that of C.
-     * (public -> private transformation)
+     * (public -&gt; private transformation)
      */
     public void findReferencingClasses1(ClassInfo classInfo) {
         String topLevelEnclosingClass = classInfo.topLevelEnclosingClass;
@@ -166,7 +166,7 @@ public class RefClassFinder {
      * For class p.C, find each project class X referencing C, whose direct or indirect superclass
      * is C's directly enclosing class, or which is a member of package p, whose top level enclosing
      * class is different from that of C.
-     * (protected -> private transformation)
+     * (protected -&gt; private transformation)
      */
     public void findThisPackageOrSubReferencingClasses1(ClassInfo classInfo) {
         String directlyEnclosingClass = classInfo.directlyEnclosingClass;
@@ -194,7 +194,7 @@ public class RefClassFinder {
     /**
      * For class p.C, find each project class X referencing C, which is a member of package p and whose
      * top level enclosing class is different from that of C.
-     * (default -> private transformation)
+     * (default -&gt; private transformation)
      */
     public void findThisPackageReferencingClasses1(ClassInfo classInfo) {
         String topLevelEnclosingClass = classInfo.topLevelEnclosingClass;
@@ -220,7 +220,7 @@ public class RefClassFinder {
 
     /**
      * For class p.C, find each project class X referencing C, which is not a member of package p.
-     * (public -> default transformation)
+     * (public -&gt; default transformation)
      */
     public void findDiffPackageReferencingClasses1(ClassInfo classInfo) {
         String packageName = classInfo.packageName;
@@ -242,7 +242,7 @@ public class RefClassFinder {
     /**
      * For class p.C, find each project class X referencing C, which is not a member of package p and
      * whose direct or indirect superclass is C's directly enclosing class.
-     * (protected -> default transformation)
+     * (protected -&gt; default transformation)
      */
     public void findDiffPackageAndSubReferencingClasses1(ClassInfo classInfo) {
         String packageName = classInfo.packageName;
@@ -379,7 +379,7 @@ public class RefClassFinder {
     /**
      * Find all project classes that reference the given field, which are in different
      * packages and are direct or indirect subclasses of the member's declaring class
-     * (protected -> default transformation).
+     * (protected -&gt; default transformation).
      */
     public void findDiffPackageAndSubReferencingClassesForField(ClassInfo classInfo, int fieldNo) {
         findReferencingClassesForMember(classInfo, fieldNo, true, true, true);
@@ -401,7 +401,7 @@ public class RefClassFinder {
     /**
      * Find all project classes that reference the given method, which are in different
      * packages and are direct or indirect subclasses of the member's declaring class
-     * (protected -> default transformation)
+     * (protected -&gt; default transformation)
      */
     public void findDiffPackageAndSubReferencingClassesForMethod(ClassInfo classInfo, int methodNo) {
         findReferencingClassesForMember(classInfo, methodNo, false, true, true);

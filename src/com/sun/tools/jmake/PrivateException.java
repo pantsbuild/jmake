@@ -11,7 +11,7 @@ package com.sun.tools.jmake;
  * only purpose is to help avoid using endless "throws" clauses in the code.
  *
  * @author  Misha Dmitriev
- * @date 12 November 2001
+ *  12 November 2001
  */
 public class PrivateException extends RuntimeException {
 

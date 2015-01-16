@@ -16,7 +16,7 @@ package com.sun.tools.jmake;
  * @see Main#mainProgrammatic(String[])
  *
  * @author  Misha Dmitriev
- * @date 17 January 2003
+ *  17 January 2003
  */
 public class PublicExceptions {
 

@@ -15,7 +15,7 @@ import java.util.Map;
  * This class implements writing into a byte array representing a project database
  *
  * @author  Misha Dmitriev
- * @date 2 March 2005
+ *  2 March 2005
  */
 public class BinaryProjectDatabaseWriter extends BinaryFileWriter {
 

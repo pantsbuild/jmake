@@ -28,7 +28,7 @@ import java.util.zip.ZipFile;
  * throughout jmake.
  *
  * @author Misha Dmitriev
- * @date 12 October 2004
+ *  12 October 2004
  */
 public class ClassPath {
 

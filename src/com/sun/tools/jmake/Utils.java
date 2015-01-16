@@ -19,7 +19,7 @@ import java.util.zip.ZipFile;
  * Utility functions used by other classes from this package.
  *
  * @author Misha Dmitriev
- * @date 23 January 2003
+ * 23 January 2003
  */
 public class Utils {
 
