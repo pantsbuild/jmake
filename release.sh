@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : ${JARJAR_JAR:=/usr/share/java/jarjar.jar}
-
+: ${JAVA:=java}
 
 function die() {
     echo "$1"
@@ -11,13 +11,17 @@ function die() {
 test -e .git || die "must be run from the root of a jmake git checkout"
 test -e build.xml || die "must be run from the root of a jmake git checkout"
 test -e jmake.pom || die "must be run from the root of a jmake git checkout"
+test -e "${JARJAR_JAR}" || die "JARJAR_JAR=${JARJAR_JAR} does not point to a file, set the JARJAR_JAR env var accordingly"
+
+java_version="$(${JAVA} -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d. -f1-2)"
+test "1.6" = "${java_version}" || die "found java ${java_version} but must release using java 1.6; set the JAVA env var accordingly"
 
 ant package_for_release || die "failed to package"
 
 version=$(java -jar dist/release/jmake.jar -version 2>/dev/null | cut -d ' ' -f 3)
 
 # Use jarjar to rewrite jar:
-java -jar $JARJAR_JAR process rename.rules dist/release/jmake.jar dist/release/jmake-renamed.jar || die "jarjar failed"
+${JAVA} -jar $JARJAR_JAR process rename.rules dist/release/jmake.jar dist/release/jmake-renamed.jar || die "jarjar failed"
 
 test -n "$version" || die "Could not get version"
 
