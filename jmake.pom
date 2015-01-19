@@ -21,6 +21,14 @@
     <tag>%TAG%</tag>
   </scm>
 
+  <distributionManagement>
+    <repository>
+      <id>ossrh</id>
+      <name>Nexus Staging Repository</name>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+
   <developers>
     <developer>
       <id>dturner</id>
@@ -29,8 +37,17 @@
       <organization>Twitter</organization>
       <organizationUrl>https://engineering.twitter.com/opensource</organizationUrl>
       <roles>
-	<role>developer</role>
-	<role>releaser</role>
+        <role>developer</role>
+        <role>releaser</role>
+      </roles>
+    </developer>
+    <developer>
+      <id>jsirois</id>
+      <name>John Sirois</name>
+      <email>john.sirois@gmail.com</email>
+      <roles>
+        <role>developer</role>
+        <role>releaser</role>
       </roles>
     </developer>
   </developers>
