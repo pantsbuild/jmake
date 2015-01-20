@@ -38,7 +38,7 @@ import java.util.zip.Adler32;
  * of changes and recompilation of .java sources for a project.
  *
  * @author Misha Dmitriev
- * @date 23 January 2003
+ *  23 January 2003
  */
 public class PCDManager {
 

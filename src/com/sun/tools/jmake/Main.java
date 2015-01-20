@@ -27,7 +27,7 @@ import java.util.List;
  * See method comments for more details.
  *
  * @author Misha Dmitriev
- * @date 12 October 2004
+ *  12 October 2004
  */
 public class Main {
 
