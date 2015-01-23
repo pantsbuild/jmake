@@ -88,10 +88,13 @@ public class PCDEntry {
             index = className.indexOf('/', index + 1);
             path = path.getParentFile();
         } while (index != -1);
+        String pathString = path.toString();
+        if (!pathString.endsWith("/"))
+            pathString += "/";
         // It is assumed that the javaFileFillPath ends with .java
         int javaPathWithoutSuffix = javaFileFullPath.length() - 5;
-        return javaFileFullPath.substring(path.toString().length(),
-                                            javaPathWithoutSuffix);
+        return javaFileFullPath.substring(pathString.length(),
+                                          javaPathWithoutSuffix);
     }
 
     /**
@@ -101,8 +104,8 @@ public class PCDEntry {
     public boolean isPackagePrivateClass() {
         String expectedClassName = getExpectedClassName();
 
-        return !className.equals(expectedClassName)
-            || (className.startsWith(expectedClassName)
-                && className.charAt(expectedClassName.length()) != '$');
+        return !(className.equals(expectedClassName)
+                 || (className.startsWith(expectedClassName)
+                     && className.charAt(expectedClassName.length()) == '$'));
     }
 }
