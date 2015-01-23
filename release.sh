@@ -16,6 +16,10 @@ test -e "${JARJAR_JAR}" || die "JARJAR_JAR=${JARJAR_JAR} does not point to a fil
 java_version="$(${JAVA} -version 2>&1 | head -1 | cut -d'"' -f2 | cut -d. -f1-2)"
 test "1.6" = "${java_version}" || die "found java ${java_version} but must release using java 1.6; set the JAVA env var accordingly"
 
+#Run ant clean to ensure that we don't have any cruft from previous
+#(potentially non-Java-6-compatible) builds hanging around.
+ant clean || die "failed to clean"
+
 ant package_for_release || die "failed to package"
 
 version=$(java -jar dist/release/jmake.jar -version 2>/dev/null | cut -d ' ' -f 3)
