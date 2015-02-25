@@ -700,10 +700,10 @@ public class PCDManager {
     private boolean classFileObsoleteOrDeleted(PCDEntry entry) {
         if (ClassPath.getVirtualPath() != null) {
             File file1 = new File(entry.javaFileFullPath);
-            if (file1 == null)
+            if (!file1.exists())
                 throw new PrivateException(new FileNotFoundException("specified source file " +
                         entry.javaFileFullPath + " not found."));
-            if (file1.lastModified() <= entry.oldClassFileLastModified)
+            if (file1.lastModified() < entry.oldClassFileLastModified)
             {
                 return false;
             }

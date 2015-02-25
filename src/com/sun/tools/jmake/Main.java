@@ -32,7 +32,7 @@ import java.util.List;
 public class Main {
 
     static final String DEFAULT_STORE_NAME = "jmake.pdb";
-    static final String VERSION = "1.3.8-10";
+    static final String VERSION = "1.3.8-11";
     private String pdbFileName = null;
     private List<String> allProjectJavaFileNamesList =
             new ArrayList<String>(100);
