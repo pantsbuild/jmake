@@ -1,0 +1,15 @@
+# Enables support for a docker container-based build
+# which should provide faster startup times and beefier
+# "machines".
+sudo: false
+
+language: java
+
+jdk:
+  - openjdk6
+
+# TODO(Eric Ayers): There is a release script we could run that does a bit more, but at the moment, it unconditinally tries to publish
+script: |
+  uname -a
+  java -version
+  ant test
