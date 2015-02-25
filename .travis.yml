@@ -3,6 +3,10 @@
 # "machines".
 sudo: false
 
+cache:
+  directories:
+    - build-support
+
 language: java
 
 jdk:
@@ -12,4 +16,4 @@ jdk:
 script: |
   uname -a
   java -version
-  ant test
+  ant -Dimport.dir=build-support import test
