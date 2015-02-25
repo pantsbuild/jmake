@@ -20,9 +20,9 @@ import java.nio.file.StandardCopyOption;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestDepFile {
+public class DepFileTest {
 
-    public TestDepFile() {
+    public DepFileTest() {
     }
 
     @Before

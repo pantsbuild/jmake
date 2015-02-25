@@ -387,7 +387,6 @@ public class PCDManager {
                 PCDEntry pcde = entry.getValue();
                 if (updatedJavaFiles.contains(pcde.javaFileFullPath)) {
                     deletedClasses.add(cls);
-                    pcd.remove(cls);
                 }
             }
         }
@@ -714,7 +713,7 @@ public class PCDManager {
             return true; // Class file has been deleted
         }
         File javaFile = new File(entry.javaFileFullPath); // Guaranteed to exist at this point
-        if (classFile.lastModified() < javaFile.lastModified()) {
+        if (classFile.lastModified() <= javaFile.lastModified()) {
             return true;
         }
         return false;
@@ -923,7 +922,7 @@ public class PCDManager {
         BufferedReader in = null;
         try {
             extraDependencies = new HashMap<String, List<String>>();
-            in = new BufferedReader(new FileReader("dependencyFile"));
+            in = new BufferedReader(new FileReader(dependencyFile));
             int lineNumber = 0;
             while (true) {
                 lineNumber ++;
