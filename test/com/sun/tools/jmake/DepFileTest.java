@@ -10,12 +10,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.channels.FileChannel;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,9 +26,9 @@ public class DepFileTest {
 
     @Before
     public void setUp() throws Exception {
-        Files.deleteIfExists(Paths.get("build/test/classes/Foo.class"));
-        Files.deleteIfExists(Paths.get("build/test/classes/Bar.class"));
-        Files.deleteIfExists(Paths.get("build/test/testdepfile.pdb"));
+        new File("build/test/classes/Foo.class").delete();
+        new File("build/test/classes/Bar.class").delete();
+        new File("build/test/testdepfile.pdb").delete();
     }
 
     @Test
@@ -96,11 +95,22 @@ public class DepFileTest {
         assertNull(pcde2);
     }
 
-    private void copyFile(String src, String dest) {
+    private static void copyFile(String source, String dest) {
+        FileChannel sourceChannel = null;
+        FileChannel destChannel = null;
         try {
-            Files.copy(Paths.get(src), Paths.get(dest), StandardCopyOption.REPLACE_EXISTING);
+            sourceChannel = new FileInputStream(new File(source)).getChannel();
+            destChannel = new FileOutputStream(new File(dest)).getChannel();
+            destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                sourceChannel.close();
+                destChannel.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
