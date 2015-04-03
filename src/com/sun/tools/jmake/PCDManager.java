@@ -482,23 +482,10 @@ public class PCDManager {
                         }
                         else
                         {
-                            String classFound = null;
-                            String sourceFound = null;
-                            // Find source and class file via virtual path
-                            String path = ClassPath.getVirtualPath();
-                            for (StringTokenizer st = new StringTokenizer(path, File.pathSeparator);
-                                (classFound == null || sourceFound == null) && st.hasMoreTokens();)
-                            {
-                                String fullPath = st.nextToken()+File.separator+e.className;
-                                if (sourceFound == null && new File(fullPath+".java").exists())
-                                {
-                                    sourceFound = fullPath + ".java";
-                                }
-                                if (classFound == null && new File(fullPath+".class").exists())
-                                {
-                                    classFound = fullPath + ".class";
-                                }
-                            }
+                            String[] files = findSourceAndClassFiles(e.className, ClassPath.getVirtualPath());
+                            String classFound = files[0];
+                            String sourceFound = files[1];
+
                             if (classFound == null)
                             {
                                 deletedClasses.add(key);
@@ -574,6 +561,25 @@ public class PCDManager {
                 }
             }
         }
+    }
+
+    private String[] findSourceAndClassFiles(String className, String path) {
+
+        String classFound = null;
+        String sourceFound = null;
+
+        StringTokenizer st = new StringTokenizer(path, File.pathSeparator);
+
+        while ((classFound == null || sourceFound == null) && st.hasMoreTokens()) {
+            String fullPath = st.nextToken() + File.separator + className;
+            if (sourceFound == null && new File(fullPath + ".java").exists()) {
+                sourceFound = fullPath + ".java";
+            }
+            if (classFound == null && new File(fullPath + ".class").exists()) {
+                classFound = fullPath + ".class";
+            }
+        }
+        return new String[] { classFound, sourceFound };
     }
 
     /**
