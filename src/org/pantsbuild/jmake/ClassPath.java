@@ -295,7 +295,7 @@ public class ClassPath {
                 if (isWindows && dirOrJar.charAt(1) == ':') {
                     dirOrJar = "/" + dirOrJar;
                 }
-                dirOrJar = "file://" + dirOrJar;
+                dirOrJar = new File(dirOrJar).toURL().toString();
             }
             if (!(dirOrJar.endsWith(".jar") || dirOrJar.endsWith(".zip") || dirOrJar.endsWith(File.separator))) {
                 dirOrJar += File.separator; // So that URLClassLoader correctly handles it as a directory

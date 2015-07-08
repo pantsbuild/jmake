@@ -274,7 +274,7 @@ public class PCDManager {
         try {
             compilerClass = compilerLoader.loadClass(jcMainClass);
         } catch (ClassNotFoundException e) {
-            throw compilerInteractionException("error loading compiler main class com.sun.tools.javac.Main", e, 0);
+            throw compilerInteractionException("error loading compiler main class " + jcMainClass, e, 0);
         }
 
         Class<?>[] args = new Class<?>[]{String[].class};
