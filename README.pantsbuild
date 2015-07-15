@@ -7,6 +7,6 @@ user:        barnett2@hya0054.prod.houston.nam.slb.com
 date:        Wed Jun 02 10:47:01 2010 -0500
 summary:     1.  Update version to 1.3.7
 
-uses http://hg-git.github.com/ to inteoperate with the parent
+uses http://hg-git.github.com/ to interoperate with the parent
 
 The intent is to get any changes here patched into the mainline.
